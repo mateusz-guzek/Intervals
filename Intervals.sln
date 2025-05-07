@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35828.75 d17.13
+VisualStudioVersion = 17.13.35828.75
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Intervals", "Intervals\Intervals.csproj", "{94432BB6-854D-4662-AD77-66FE9D5DE9E0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntervalTests", "IntervalTests\IntervalTests.csproj", "{3A0EAE4E-78BC-4796-9A1D-F5C83AFA31B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nonlinear Solvers", "LinearSolver\Nonlinear Solvers.csproj", "{47901082-D110-47CA-B7C6-F99DAE0CC128}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolversTests", "SolversTests\SolversTests.csproj", "{BF8E8EB7-698D-4115-BBF5-77AF1431CC28}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{3A0EAE4E-78BC-4796-9A1D-F5C83AFA31B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A0EAE4E-78BC-4796-9A1D-F5C83AFA31B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A0EAE4E-78BC-4796-9A1D-F5C83AFA31B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47901082-D110-47CA-B7C6-F99DAE0CC128}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47901082-D110-47CA-B7C6-F99DAE0CC128}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47901082-D110-47CA-B7C6-F99DAE0CC128}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47901082-D110-47CA-B7C6-F99DAE0CC128}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF8E8EB7-698D-4115-BBF5-77AF1431CC28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF8E8EB7-698D-4115-BBF5-77AF1431CC28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF8E8EB7-698D-4115-BBF5-77AF1431CC28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF8E8EB7-698D-4115-BBF5-77AF1431CC28}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

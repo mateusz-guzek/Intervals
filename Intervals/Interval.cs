@@ -1,5 +1,7 @@
 ﻿
 
+using System.Reflection.Metadata;
+
 namespace Intervals
 {
 
@@ -26,6 +28,9 @@ namespace Intervals
     /// 
     public class Interval
     {
+
+        private const double epsilon = 1e-15;
+
         private double start;
         private double end;
 
@@ -45,8 +50,8 @@ namespace Intervals
 
         public Interval(double number)
         {
-            start = number;
-            end = number;
+            start = number - epsilon;
+            end = number + epsilon;
         }
 
         public bool Contains(double number)
@@ -61,7 +66,7 @@ namespace Intervals
 
         public override string ToString()
         {
-            return $"{start}...{end}";
+            return $"[{start} , {end}]";
         }
 
         public static Interval operator +(Interval left, Interval right)
@@ -89,99 +94,93 @@ namespace Intervals
 
         public static Interval operator /(Interval left, Interval right)
         {
-            double c = right.start, d = right.end;
-
             // Division by an interval containing zero is undefined
             if (right.Contains(0))
                 throw new DivideByZeroException("Division by an interval containing zero is undefined.");
 
-            double a = left.start, b = left.end;
+            double newRightA = 1 / right.End;
+            double newRightB = 1 / right.Start;
 
-            // Compute all 4 combinations
-            double[] quotients =
-            {
-            a / c, a / d,
-            b / c, b / d
-        };
+            Interval newRight = new Interval(newRightA, newRightB);
+            return left * newRight;
+        }
 
-            double min = quotients.Min();
-            double max = quotients.Max();
+        public bool ContainsPositive()
+        {
+            return end > 0;
+        }
+
+        public bool ContainsNegative()
+        {
+            return start < 0;
+        }
+
+
+        //  ZAŁOŻENIA:
+        //  Funkcja sinus i cosinus są na danym przedziale monotoniczne
+
+        public Interval Sin()
+        {
+            if (Start > End)
+                throw new ArgumentException("Invalid interval");
+
+            // Normalize to [0, 2π] for better behavior
+            double twoPi = 2 * Math.PI;
+            double a = Start % twoPi;
+            double b = End % twoPi;
+
+            if (a > b)
+                b += twoPi;
+
+            double sinA = Math.Sin(a);
+            double sinB = Math.Sin(b);
+
+            double min = Math.Min(sinA, sinB);
+            double max = Math.Max(sinA, sinB);
+
+            // Check for full sine wave within the interval
+            if ((a <= Math.PI / 2 && b >= Math.PI / 2) ||
+                (a <= 5 * Math.PI / 2 && b >= 5 * Math.PI / 2))
+                max = 1;
+            if ((a <= 3 * Math.PI / 2 && b >= 3 * Math.PI / 2) ||
+                (a <= 7 * Math.PI / 2 && b >= 7 * Math.PI / 2))
+                min = -1;
 
             return new Interval(min, max);
         }
 
-        public Interval Sin()
-        {
-
-            Interval s = this;
-            Interval w = this;
-            Interval x2 = this * this;
-
-            int k = 1;
-            bool isEven = true;
-            bool finished = false;
-
-            while (!finished && k < int.MaxValue / 2)
-            {
-                double denom = (k + 1) * (k + 2);
-                Interval d = new Interval(denom);
-
-                s = s * (x2 / d);
-
-                Interval w1 = isEven ? w - s : w + s;
-
-                if (HasConverged(w, w1))
-                {
-                    // Clamp result to [-1, 1] due to sin() range
-                    double a = Math.Max(-1, w1.start);
-                    double b = Math.Min(1, w1.end);
-                    return new Interval(a, b);
-                }
-
-                w = w1;
-                k += 2;
-                isEven = !isEven;
-            }
-
-            throw new InvalidOperationException("Interval.Sin did not converge.");
-        }
 
         public Interval Cos()
         {
+            if (Start > End)
+                throw new ArgumentException("Invalid interval");
 
-            Interval c = new Interval(1);
-            Interval w = c;
-            Interval x2 = this * this;
+            double twoPi = 2 * Math.PI;
 
-            int k = 1;
-            bool isEven = true;
-            bool finished = false;
+            // Normalize [a, b] to within [0, 2π]
+            double a = Start % twoPi;
+            double b = End % twoPi;
+            if (a < 0) a += twoPi;
+            if (b < 0) b += twoPi;
+            if (a > b) b += twoPi; // to preserve order
 
-            while (!finished && k < int.MaxValue / 2)
-            {
-                double denom = k * (k + 1);
-                Interval d = new Interval(denom);
+            double cosA = Math.Cos(a);
+            double cosB = Math.Cos(b);
 
-                c = c * (x2 / d);
+            double min = Math.Min(cosA, cosB);
+            double max = Math.Max(cosA, cosB);
 
-                Interval w1 = isEven ? w - c : w + c;
+            // Check if max occurs in [a, b] → at x = 0, 2π, etc.
+            if ((a <= 0 && b >= 0) || (a <= twoPi && b >= twoPi))
+                max = 1;
 
-                if (HasConverged(w, w1))
-                {
-                    // Clamp result to [-1, 1]
-                    Console.WriteLine($"{w1.Start} {w1.End}");
-                    double a = Math.Max(-1, w1.start);
-                    double b = Math.Min(1, w1.end);
-                    return new Interval(a, b);
-                }
+            // Check if min occurs in [a, b] → at x = π, 3π, etc.
+            if ((a <= Math.PI && b >= Math.PI) || (a <= 3 * Math.PI && b >= 3 * Math.PI))
+                min = -1;
 
-                w = w1;
-                k += 2;
-                isEven = !isEven;
-            }
-
-            throw new InvalidOperationException("Interval.Cos did not converge.");
+            return new Interval(min, max);
         }
+
 
         public Interval Exp()
         {
@@ -260,7 +259,7 @@ namespace Intervals
 
         private static bool HasConverged(Interval prev, Interval next)
         {
-            const double eps = 1e-18;
+            const double eps = 1e-64;
             return RelDiff(prev.start, next.start) < eps &&
                    RelDiff(prev.end, next.end) < eps;
         }

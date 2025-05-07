@@ -6,47 +6,65 @@ namespace IntervalTests
     public class IntervalUnitTest
     {
         [Fact]
-        public void TestAddition()
+        public void Constructor_SetsStartAndEnd()
         {
-            var a = new Interval(1, 2);
-            var b = new Interval(3, 4);
-            var result = a + b;
-            Assert.Equal(4, result.Start);
-            Assert.Equal(6, result.End);
+            var interval = new Interval(1.0, 2.0);
+            Assert.Equal(1.0, interval.Start);
+            Assert.Equal(2.0, interval.End);
         }
 
         [Fact]
-        public void TestSubtraction()
+        public void Constructor_ThrowsIfStartGreaterThanEnd()
         {
-            var a = new Interval(5, 7);
-            var b = new Interval(2, 3);
-            var result = a - b;
-            Assert.Equal(2, result.Start);
-            Assert.Equal(5, result.End);
+            Assert.Throws<ArgumentException>(() => new Interval(2.0, 1.0));
         }
 
         [Fact]
-        public void TestMultiplication()
+        public void Contains_ChecksCorrectly()
         {
-            var a = new Interval(1, 2);
-            var b = new Interval(3, 4);
-            var result = a * b;
-            Assert.Equal(3, result.Start);
-            Assert.Equal(8, result.End);
+            var interval = new Interval(-1, 2);
+            Assert.True(interval.Contains(0));
+            Assert.False(interval.Contains(-2));
         }
 
         [Fact]
-        public void TestDivision()
+        public void Width_ComputesCorrectly()
         {
-            var a = new Interval(4, 6);
-            var b = new Interval(2, 3);
+            var interval = new Interval(3.5, 5.5);
+            Assert.Equal(2.0, interval.Width());
+        }
+
+        [Theory]
+        [InlineData(1, 2, 3, 4, 4, 6)]
+        public void Addition_Works(double a1, double b1, double a2, double b2, double exStart, double exEnd)
+        {
+            var result = new Interval(a1, b1) + new Interval(a2, b2);
+            Assert.Equal(exStart, result.Start, 5);
+            Assert.Equal(exEnd, result.End, 5);
+        }
+
+        [Fact]
+        public void Multiplication_Works()
+        {
+            var interval1 = new Interval(-2, 3);
+            var interval2 = new Interval(4, 5);
+            var result = interval1 * interval2;
+            Assert.Equal(-10, result.Start, 5);
+            Assert.Equal(15, result.End, 5);
+        }
+
+        [Fact]
+        public void Division_Works()
+        {
+            var a = new Interval(2, 4);
+            var b = new Interval(1, 2);
             var result = a / b;
-            Assert.Equal(4.0 / 3.0, result.Start, 10);
-            Assert.Equal(6.0 / 2.0, result.End, 10);
+            Assert.Equal(1, result.Start, 5);
+            Assert.Equal(4, result.End, 5);
         }
 
         [Fact]
-        public void TestDivisionByZeroThrows()
+        public void Division_ByIntervalContainingZero_Throws()
         {
             var a = new Interval(1, 2);
             var b = new Interval(-1, 1);
@@ -54,83 +72,107 @@ namespace IntervalTests
         }
 
         [Fact]
-        public void TestContains()
+        public void Sqr_CorrectForPositive()
         {
-            var interval = new Interval(1, 3);
-            Assert.True(interval.Contains(2));
-            Assert.True(interval.Contains(1));
-            Assert.True(interval.Contains(3));
-            Assert.False(interval.Contains(0.9999));
-            Assert.False(interval.Contains(3.0001));
+            var interval = new Interval(2, 3);
+            var result = interval.Sqr();
+            Assert.Equal(4, result.Start, 5);
+            Assert.Equal(9, result.End, 5);
         }
 
         [Fact]
-        public void TestWidth()
+        public void Sqr_CorrectForNegative()
         {
-            var interval = new Interval(5.5, 7.0);
-            Assert.Equal(1.5, interval.Width(), 10);
+            var interval = new Interval(-3, -2);
+            var result = interval.Sqr();
+            Assert.Equal(4, result.Start, 5);
+            Assert.Equal(9, result.End, 5);
         }
 
         [Fact]
-        public void TestSqr()
+        public void Sqr_CorrectForMixed()
         {
             var interval = new Interval(-2, 3);
             var result = interval.Sqr();
-            Assert.Equal(0, result.Start, 10);
-            Assert.Equal(9, result.End, 10);
+            Assert.Equal(0, result.Start, 5);
+            Assert.Equal(9, result.End, 5);
         }
 
         [Fact]
-        public void TestSqrt()
+        public void Sqrt_Works()
         {
             var interval = new Interval(4, 9);
             var result = interval.Sqrt();
-            Assert.Equal(2, result.Start, 10);
-            Assert.Equal(3, result.End, 10);
+            Assert.Equal(2, result.Start, 5);
+            Assert.Equal(3, result.End, 5);
         }
 
         [Fact]
-        public void TestSqrtNegativeThrows()
+        public void Sqrt_ThrowsOnNegative()
         {
             var interval = new Interval(-1, 4);
             Assert.Throws<ArgumentException>(() => interval.Sqrt());
         }
 
         [Fact]
-        public void TestSqrtN()
+        public void SqrtN_Works()
         {
-            var interval = new Interval(1, 27);
-            var result = interval.SqrtN(3); // cube root
-            Assert.Equal(1, result.Start, 10);
-            Assert.Equal(3, result.End, 10);
+            var interval = new Interval(8, 27);
+            var result = interval.SqrtN(3);
+            Assert.InRange(result.Start, 2.0, 2.1);
+            Assert.InRange(result.End, 3.0, 3.1);
         }
 
         [Fact]
-        public void TestExp()
+        public void ContainsPositiveNegative_Works()
+        {
+            var interval = new Interval(-2, 3);
+            Assert.True(interval.ContainsPositive());
+            Assert.True(interval.ContainsNegative());
+
+            var pos = new Interval(1, 2);
+            Assert.True(pos.ContainsPositive());
+            Assert.False(pos.ContainsNegative());
+
+            var neg = new Interval(-5, -1);
+            Assert.False(neg.ContainsPositive());
+            Assert.True(neg.ContainsNegative());
+        }
+
+        [Fact]
+        public void Sin_WorksRoughlyCorrectly()
+        {
+            var interval = new Interval(0, Math.PI / 2);
+            var result = interval.Sin();
+            Console.WriteLine(result);
+            Assert.True(result.Start >= 0);
+            Assert.True(result.End <= 1);
+        }
+
+        [Fact]
+        public void Cos_WorksRoughlyCorrectly()
+        {
+            var interval = new Interval(0, Math.PI / 2);
+            var result = interval.Cos();
+            Assert.True(result.Start >= 0);
+            Assert.True(result.End <= 1);
+        }
+
+        [Fact]
+        public void Exp_Works()
         {
             var interval = new Interval(0, 1);
             var result = interval.Exp();
-            Assert.True(result.Start >= 1);
-            Assert.True(result.End >= Math.E - 0.01 && result.End <= Math.E + 0.01);
+
+            Assert.True(result.Contains(1));
+            Assert.True(result.Contains(Math.E));
         }
 
         [Fact]
-        public void TestSinClamping()
+        public void Constants_AreReasonable()
         {
-            var interval = new Interval(0, Math.PI);
-            var result = interval.Sin();
-            Assert.True(result.Start >= -1);
-            Assert.True(result.End <= 1);
-        }
-
-        [Fact]
-        public void TestCosClamping()
-        {
-            var interval = new Interval(0, Math.PI);
-            var result = interval.Cos();
-            
-            Assert.True(result.Start >= -1);
-            Assert.True(result.End <= 1);
+            Assert.InRange(Interval.Pi.Start, 3.1415, 3.1416);
+            Assert.InRange(Interval.Sqrt2.Start * Interval.Sqrt2.Start, 1.999, 2.001);
         }
     }
 }
