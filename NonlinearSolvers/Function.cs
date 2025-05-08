@@ -1,7 +1,7 @@
 using System;
 using Intervals;
 
-namespace LinearSolver;
+namespace Nonlinear_Solvers;
 
 public static class Function
 {
