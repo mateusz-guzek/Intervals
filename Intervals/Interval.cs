@@ -1,6 +1,4 @@
-﻿
-
-using System.Reflection.Metadata;
+﻿using Numerics.NET;
 
 namespace Intervals
 {
@@ -22,24 +20,24 @@ namespace Intervals
     /// exp     x
     /// sqr     x
     /// sqrtN   x
-    /// pi
+    /// pi      x
     /// 
     /// 
     /// 
     public class Interval
     {
 
-        private const double epsilon = 1e-15;
+        private BigFloat epsilon = 1e-20;
 
-        private double start;
-        private double end;
+        private BigFloat start;
+        private BigFloat end;
 
-        public double Start => start;
-        public double End => end;
+        public BigFloat Start => start;
+        public BigFloat End => end;
 
 
 
-        public Interval(double start, double end)
+        public Interval(BigFloat start, BigFloat end)
         {
             if (start.CompareTo(end) > 0)
                 throw new ArgumentException("Start cannot be greater than end.");
@@ -48,18 +46,18 @@ namespace Intervals
             this.end = end;
         }
 
-        public Interval(double number)
+        public Interval(BigFloat number)
         {
             start = number - epsilon;
             end = number + epsilon;
         }
 
-        public bool Contains(double number)
+        public bool Contains(BigFloat number)
         {
             return start <= number && end >= number;
         }
 
-        public double Width()
+        public BigFloat Width()
         {
             return end - start;
         }
@@ -81,13 +79,13 @@ namespace Intervals
 
         public static Interval operator *(Interval left, Interval right)
         {
-            double a = left.start, b = left.end;
-            double c = right.start, d = right.end;
+            BigFloat a = left.start, b = left.end;
+            BigFloat c = right.start, d = right.end;
 
-            double[] products = { a * c, a * d, b * c, b * d };
+            BigFloat[] products = { a * c, a * d, b * c, b * d };
 
-            double min = products.Min();
-            double max = products.Max();
+            BigFloat min = products.Min();
+            BigFloat max = products.Max();
 
             return new Interval(min, max);
         }
@@ -98,8 +96,8 @@ namespace Intervals
             if (right.Contains(0))
                 throw new DivideByZeroException("Division by an interval containing zero is undefined.");
 
-            double newRightA = 1 / right.End;
-            double newRightB = 1 / right.Start;
+            BigFloat newRightA = 1 / right.End;
+            BigFloat newRightB = 1 / right.Start;
 
             Interval newRight = new Interval(newRightA, newRightB);
             return left * newRight;
@@ -125,18 +123,18 @@ namespace Intervals
                 throw new ArgumentException("Invalid interval");
 
             // Normalize to [0, 2π] for better behavior
-            double twoPi = 2 * Math.PI;
-            double a = Start % twoPi;
-            double b = End % twoPi;
+            BigFloat twoPi = 2 * Math.PI;
+            BigFloat a = Start % twoPi;
+            BigFloat b = End % twoPi;
 
             if (a > b)
                 b += twoPi;
 
-            double sinA = Math.Sin(a);
-            double sinB = Math.Sin(b);
+            BigFloat sinA = BigFloat.Sin(a);
+            BigFloat sinB = BigFloat.Sin(b);
 
-            double min = Math.Min(sinA, sinB);
-            double max = Math.Max(sinA, sinB);
+            BigFloat min = Utility.Min(sinA, sinB);
+            BigFloat max = Utility.Max(sinA, sinB);
 
             // Check for full sine wave within the interval
             if ((a <= Math.PI / 2 && b >= Math.PI / 2) ||
@@ -155,20 +153,20 @@ namespace Intervals
             if (Start > End)
                 throw new ArgumentException("Invalid interval");
 
-            double twoPi = 2 * Math.PI;
+            BigFloat twoPi = 2 * Math.PI;
 
             // Normalize [a, b] to within [0, 2π]
-            double a = Start % twoPi;
-            double b = End % twoPi;
+            BigFloat a = Start % twoPi;
+            BigFloat b = End % twoPi;
             if (a < 0) a += twoPi;
             if (b < 0) b += twoPi;
             if (a > b) b += twoPi; // to preserve order
 
-            double cosA = Math.Cos(a);
-            double cosB = Math.Cos(b);
+            BigFloat cosA = BigFloat.Cos(a);
+            BigFloat cosB = BigFloat.Cos(b);
 
-            double min = Math.Min(cosA, cosB);
-            double max = Math.Max(cosA, cosB);
+            BigFloat min = Utility.Min(cosA, cosB);
+            BigFloat max = Utility.Max(cosA, cosB);
 
             // Check if max occurs in [a, b] → at x = 0, 2π, etc.
             if ((a <= 0 && b >= 0) || (a <= twoPi && b >= twoPi))
@@ -212,8 +210,8 @@ namespace Intervals
         public Interval Sqr()
         {
 
-            double minx;
-            double maxx;
+            BigFloat minx;
+            BigFloat maxx;
 
             // Find minimum square
             if (start <= 0 && end >= 0)
@@ -231,10 +229,10 @@ namespace Intervals
             }
 
             // Find maximum square (based on absolute value)
-            maxx = Math.Max(Math.Abs(start), Math.Abs(end));
+            maxx = Utility.Max(BigFloat.Abs(start), BigFloat.Abs(end));
 
-            double minSqr = minx * minx;
-            double maxSqr = maxx * maxx;
+            BigFloat minSqr = minx * minx;
+            BigFloat maxSqr = maxx * maxx;
 
             return new Interval(minSqr, maxSqr);
         }
@@ -243,14 +241,14 @@ namespace Intervals
         {
             if (start < 0)
                 throw new ArgumentException("Cannot take square root of interval containing negative values.");
-            return new Interval(Math.Sqrt(start), Math.Sqrt(end));
+            return new Interval(BigFloat.Sqrt(start), BigFloat.Sqrt(end));
         }
 
         public Interval SqrtN(int n)
         {
             if (n <= 0)
                 throw new ArgumentException("n must be positive.");
-            return new Interval(Math.Pow(start, 1.0 / n), Math.Pow(end, 1.0 / n));
+            return new Interval(BigFloat.Pow(start, 1.0 / n), BigFloat.Pow(end, 1.0 / n));
         }
 
 
@@ -259,15 +257,15 @@ namespace Intervals
 
         private static bool HasConverged(Interval prev, Interval next)
         {
-            const double eps = 1e-64;
+            BigFloat eps = 1e-64;
             return RelDiff(prev.start, next.start) < eps &&
                    RelDiff(prev.end, next.end) < eps;
         }
 
-        private static double RelDiff(double a, double b)
+        private static BigFloat RelDiff(BigFloat a, BigFloat b)
         {
-            if (a == 0.0) return Math.Abs(b);
-            return Math.Abs(a - b) / Math.Abs(a);
+            if (a == 0.0) return BigFloat.Abs(b);
+            return BigFloat.Abs(a - b) / BigFloat.Abs(a);
         }
 
         public static readonly Interval Sqrt2 = new Interval(1.414213562373095048, 1.414213562373095049);

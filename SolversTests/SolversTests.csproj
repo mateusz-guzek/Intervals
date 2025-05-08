@@ -24,7 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../Intervals/Intervals.csproj" />
     <ProjectReference Include="../LinearSolver/Nonlinear Solvers.csproj" />
+    <ProjectReference Include="../NonlinearSolvers/Nonlinear Solvers.csproj" />
   </ItemGroup>
 
 </Project>
