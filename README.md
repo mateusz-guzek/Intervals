@@ -1,2 +1,2 @@
-# Intervals
-## nie opublikuję tego kodu bo mnei pały dojadą
+# Rozwiązywanie równania nieliniowego metodą połowienia, regula-falsi i metodą siecznych
+## nie roszczę sobie żadnych praw do tego kodu
