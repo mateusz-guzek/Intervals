@@ -7,10 +7,10 @@ namespace Nonlinear_Solvers;
 
 public static class Bisection
 {
-    public static BigFloat Eval(Func<BigFloat, BigFloat> f, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
+    public static Result<BigFloat> Eval(Func<BigFloat, BigFloat> f, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
     {
 
-        if (f(a) * f(b) > 0)
+        if ((f(a) * f(b)).Sign > 0)
             throw new ArgumentException("Function doesnt change its sign between a and b");
 
 
@@ -24,9 +24,9 @@ public static class Bisection
 
             BigFloat mid = (a + b) / 2;
             if (BigFloat.Abs(f(mid)) < epsilon)
-                return mid;
+                return new Result<BigFloat>(EvalStatus.FULL_SUCCESS, iterations, mid);
 
-            if (f(a) * f(mid) < 0)
+            if ((f(a) * f(mid)).Sign < 0)
             {
                 b = mid;
             }
@@ -37,16 +37,16 @@ public static class Bisection
 
             if (iterations >= mit)
             {
-                return mid;
+                return new Result<BigFloat>(EvalStatus.FULL_SUCCESS, iterations, mid);
             }
 
         }
 
-        return (a + b) / 2;
+        return new Result<BigFloat>(EvalStatus.FULL_SUCCESS, iterations, (a + b) / 2);
 
     }
 
-    public static Interval Eval(Func<Interval, Interval> f, Interval a, Interval b, int mit, double epsilon)
+    public static Result<Interval> Eval(Func<Interval, Interval> f, Interval a, Interval b, int mit, BigFloat epsilon)
     {
 
         BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
@@ -56,7 +56,7 @@ public static class Bisection
             throw new ArgumentException("Function doesnt change its sign between a and b");
 
 
-        epsilon = Math.Abs(epsilon);
+        epsilon = BigFloat.Abs(epsilon);
 
         int iterations = 0;
 
@@ -68,7 +68,7 @@ public static class Bisection
             Interval mid = new Interval(midPoint, midPoint);
 
             if (f(mid).Contains(0) && BigFloat.Abs(mid.End - mid.Start) < epsilon)
-                return mid;
+                return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, mid);
 
             if ((f(a) * f(mid)).ContainsNegative())
             {
@@ -81,12 +81,12 @@ public static class Bisection
 
             if (iterations >= mit)
             {
-                return mid;
+                return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, mid);
             }
 
         }
 
-        return (a + b) / new Interval(2);
+        return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, (a + b) / new Interval(2));
 
     }
 
