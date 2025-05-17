@@ -6,12 +6,12 @@ namespace Nonlinear_Solvers;
 
 public class RegulaFalsi
 {
-    public static Result<BigFloat> Eval(Func<BigFloat, BigFloat> f, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
+    public static Result<BigFloat> Eval(Function function, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
     {
         BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
         BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
         
-        if ((f(a) * f(b)).Sign == 1)
+        if ((F(a) * F(b)).Sign == 1)
         {
             throw new ArgumentException("Function doesnt change its sign between a and b");
         }
@@ -21,31 +21,33 @@ public class RegulaFalsi
 
         int iterations = 0;
 
-        BigFloat x1 = (a * f(b) - b * f(a)) / (f(b) - f(a));
+        BigFloat x1 = (a * F(b) - b * F(a)) / (F(b) - F(a));
 
 
         while (iterations < mit)
         {
             iterations++;
-            if ((f(a) * f(x1)).Sign < 0)
+            if ((F(a) * F(x1)).Sign < 0)
             {
-                x1 = (x1 * f(a) - a * f(x1)) / (f(a) - f(x1));
+                x1 = (x1 * F(a) - a * F(x1)) / (F(a) - F(x1));
             }
-            else if ((f(b) * f(x1)).Sign < 0)
+            else if ((F(b) * F(x1)).Sign < 0)
             {
-                x1 = (x1 * f(b) - b * f(x1)) / (f(b) - f(x1));
+                x1 = (x1 * F(b) - b * F(x1)) / (F(b) - F(x1));
             }
         }
 
         return new Result<BigFloat>(EvalStatus.FULL_SUCCESS, iterations, x1);
+
+        BigFloat F(BigFloat n) => function.Eval(n);
     }
 
-    public static Result<Interval> Eval(Func<Interval, Interval> f, Interval a, Interval b, int mit, BigFloat epsilon)
+    public static Result<Interval> Eval(Function function, Interval a, Interval b, int mit, BigFloat epsilon)
     {
         BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
         BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
 
-        if (!(f(a) * f(b)).ContainsNegative())
+        if (!(F(a) * F(b)).ContainsNegative())
             throw new ArgumentException("Function doesnt change its sign between a and b");
 
 
@@ -53,23 +55,25 @@ public class RegulaFalsi
 
         int iterations = 0;
 
-        Interval x1 = (a * f(b) - b * f(a)) / (f(b) - f(a));
+        Interval x1 = (a * F(b) - b * F(a)) / (F(b) - F(a));
 
         while (BigFloat.Abs(x1.Start - x1.End) > epsilon)
         {
             iterations++;
-            if (!(f(a) * f(x1)).ContainsNegative())
+            if (!(F(a) * F(x1)).ContainsNegative())
             {
-                x1 = (x1 * f(a) - a * f(x1)) / (f(a) - f(x1));
+                x1 = (x1 * F(a) - a * F(x1)) / (F(a) - F(x1));
             }
-            else if (!(f(b) * f(x1)).ContainsNegative())
+            else if (!(F(b) * F(x1)).ContainsNegative())
             {
-                x1 = (x1 * f(b) - b * f(x1)) / (f(b) - f(x1));
+                x1 = (x1 * F(b) - b * F(x1)) / (F(b) - F(x1));
             }
             
             if(iterations == mit) break;
         }
 
         return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, x1);
+
+        Interval F(Interval n) => function.Eval(n);
     }
 }

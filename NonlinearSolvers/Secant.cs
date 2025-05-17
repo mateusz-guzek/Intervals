@@ -5,12 +5,12 @@ namespace Nonlinear_Solvers;
 
 public class Secant
 {
-    public static Result<BigFloat> Eval(Func<BigFloat, BigFloat> f, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
+    public static Result<BigFloat> Eval(Function function, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
     {
         BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
         BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
 
-        if ((f(a) * f(b)).Sign == 1)
+        if ((F(a) * F(b)).Sign == 1)
         {
             throw new ArgumentException("Function doesnt change its sign between a and b");
         }
@@ -23,27 +23,29 @@ public class Secant
         BigFloat x0 = a;
         BigFloat x1 = b;
 
-        BigFloat xn = (f(x1) * x0 - f(x0) * x1) / (f(x1) - f(x0));
+        BigFloat xn = (F(x1) * x0 - F(x0) * x1) / (F(x1) - F(x0));
         x0 = x1;
         x1 = xn;
 
-        while (iterations < mit && BigFloat.Abs(f(x1)) > epsilon)
+        while (iterations < mit && BigFloat.Abs(F(x1)) > epsilon)
         {
             iterations++;
-            xn = (f(x1) * x0 - f(x0) * x1) / (f(x1) - f(x0));
+            xn = (F(x1) * x0 - F(x0) * x1) / (F(x1) - F(x0));
             x0 = x1;
             x1 = xn;
         }
 
         return new Result<BigFloat>(EvalStatus.FULL_SUCCESS, iterations, x1);
+
+        BigFloat F(BigFloat n) => function.Eval(n);
     }
 
-    public static Result<Interval> Eval(Func<Interval, Interval> f, Interval a, Interval b, int mit, BigFloat epsilon)
+    public static Result<Interval> Eval(Function function, Interval a, Interval b, int mit, BigFloat epsilon)
     {
         BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
         BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
 
-        if (!(f(a) * f(b)).ContainsNegative())
+        if (!(F(a) * F(b)).ContainsNegative())
             throw new ArgumentException("Function doesnt change its sign between a and b");
 
 
@@ -54,18 +56,20 @@ public class Secant
         Interval x0 = a;
         Interval x1 = b;
 
-        Interval xn = (f(x1) * x0 - f(x0) * x1) / (f(x1) - f(x0));
+        Interval xn = (F(x1) * x0 - F(x0) * x1) / (F(x1) - F(x0));
         x0 = x1;
         x1 = xn;
 
         while (iterations < mit)
         {
             iterations++;
-            xn = (f(x1) * x0 - f(x0) * x1) / (f(x1) - f(x0));
+            xn = (F(x1) * x0 - F(x0) * x1) / (F(x1) - F(x0));
             x0 = x1;
             x1 = xn;
         }
 
         return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, x1);
+
+        Interval F(Interval n) => function.Eval(n);
     }
 }
