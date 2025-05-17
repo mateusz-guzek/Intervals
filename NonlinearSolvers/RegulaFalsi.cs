@@ -1,4 +1,5 @@
 using System;
+using Functions;
 using Numerics.NET;
 using Interval = Intervals.Interval;
 
@@ -6,7 +7,7 @@ namespace Nonlinear_Solvers;
 
 public class RegulaFalsi
 {
-    public static Result<BigFloat> Eval(Function function, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
+    public static Result<BigFloat> Eval(IFunction function, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
     {
         BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
         BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
@@ -42,7 +43,7 @@ public class RegulaFalsi
         BigFloat F(BigFloat n) => function.Eval(n);
     }
 
-    public static Result<Interval> Eval(Function function, Interval a, Interval b, int mit, BigFloat epsilon)
+    public static Result<Interval> Eval(IFunction function, Interval a, Interval b, int mit, BigFloat epsilon)
     {
         BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
         BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);

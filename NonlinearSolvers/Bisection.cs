@@ -1,4 +1,5 @@
 using System;
+using Functions;
 using Intervals;
 using Numerics.NET;
 using Interval = Intervals.Interval;
@@ -7,7 +8,7 @@ namespace Nonlinear_Solvers;
 
 public static class Bisection
 {
-    public static Result<BigFloat> Eval(Function function, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
+    public static Result<BigFloat> Eval(IFunction function, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
     {
         if ((F(a) * F(b)) > new BigFloat(0))
             throw new ArgumentException("Function doesnt change its sign between a and b");
@@ -49,7 +50,7 @@ public static class Bisection
         BigFloat F(BigFloat n) => function.Eval(n);
     }
 
-    public static Result<Interval> Eval(Function function, Interval a, Interval b, int mit, BigFloat epsilon)
+    public static Result<Interval> Eval(IFunction function, Interval a, Interval b, int mit, BigFloat epsilon)
     {
         BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
         BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
