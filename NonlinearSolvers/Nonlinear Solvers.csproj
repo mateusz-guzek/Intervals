@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Intervals/Intervals.csproj" />
+    <ProjectReference Include="..\Functions\Functions.csproj" />
   </ItemGroup>
 
 </Project>

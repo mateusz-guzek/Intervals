@@ -6,6 +6,8 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="IntervalsDesktop.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
+        Width="800"
+        Height="600"
         Icon="/Assets/avalonia-logo.ico"
         Title="Rozwiązywanie równań nieliniowych">
 
@@ -13,18 +15,43 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <StackPanel Orientation="Horizontal">
-        <StackPanel Orientation="Vertical">
-            <StackPanel Orientation="Vertical">
+    <StackPanel Orientation="Horizontal" Spacing="16">
+        <StackPanel Orientation="Vertical" Spacing="16">
+            <StackPanel Orientation="Vertical" Spacing="16">
                 <TextBlock>Wybierz rodzaj arytmetyki:</TextBlock>
                 <ListBox ItemsSource="{Binding ArithmeticModes}"
                          SelectedItem="{Binding SelectedMode, Mode=TwoWay}" />
             </StackPanel>
-            <Button>Załaduj bibliotekę z funkcjami</Button>
+            <Button Click="OnSelectLibraryButtonClicked">Załaduj bibliotekę z funkcjami</Button>
         </StackPanel>
-        <StackPanel Orientation="Vertical">
+        <StackPanel Orientation="Vertical" Spacing="16">
+            <TextBlock>Przedział w którym znajduje się szukane miejsce zerowe:</TextBlock>
+            <StackPanel Orientation="Horizontal" Spacing="16">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock>Lewa granica: </TextBlock>
+                    <StackPanel Orientation="Vertical" Spacing="4">
+                        <TextBox Width="128" Text="{Binding A1}"></TextBox>
+                        <TextBox Width="128" Text="{Binding A2}" IsVisible="{Binding IsArithmeticModeSelected, Mode=TwoWay}"></TextBox>
+                    </StackPanel>
+
+                </StackPanel>
+                <StackPanel Orientation="Vertical">
+                    <TextBlock>Prawa granica:</TextBlock>
+                    <StackPanel Orientation="Vertical" Spacing="4">
+                        <TextBox Width="128" Text="{Binding B1}"></TextBox>
+                        <TextBox Width="128" Text="{Binding B2}" IsVisible="{Binding IsArithmeticModeSelected, Mode=TwoWay}"></TextBox>
+                    </StackPanel>
+
+                </StackPanel>
+            </StackPanel>
 
         </StackPanel>
+        <StackPanel Orientation="Vertical">
+            <TextBlock>Wybierz metodę obliczeń:</TextBlock>
+            <ListBox ItemsSource="{Binding Methods}"
+                     SelectedItem="{Binding SelectedMethod, Mode=TwoWay}" />
+        </StackPanel>
+        
     </StackPanel>
 
 
