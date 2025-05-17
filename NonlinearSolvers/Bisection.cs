@@ -10,7 +10,8 @@ public static class Bisection
     public static Result<BigFloat> Eval(Func<BigFloat, BigFloat> f, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
     {
 
-        if ((f(a) * f(b)).Sign > 0)
+
+        if ((f(a) * f(b)) > new BigFloat(0))
             throw new ArgumentException("Function doesnt change its sign between a and b");
 
 

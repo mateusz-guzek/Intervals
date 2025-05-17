@@ -7,7 +7,7 @@ using Interval = Intervals.Interval;
 
 namespace SolversTests
 {
-    public class SolversUnitTest
+    public class BisectionTests
     {
         // [Fact]
         // public void Bisection_Interval_SimplePolynomial_ShouldFindRoot()
@@ -38,8 +38,8 @@ namespace SolversTests
             // f(x) = x^2 + 1 has no real roots
             Func<Interval, Interval> f = x => x.Sqr() + new Interval(1.0);
 
-            Interval a = new Interval(-1.0, -1.0);
-            Interval b = new Interval(1.0, 1.0);
+            Interval a = new Interval(-1);
+            Interval b = new Interval(1);
             int maxIter = 100;
             double epsilon = 1e-10;
 
@@ -51,7 +51,7 @@ namespace SolversTests
         public void Bisection_Interval_SinFunction_ShouldFindRootNearZero()
         {
             // f(x) = sin(x)
-            Func<Interval, Interval> f = x => x;
+            Func<Interval, Interval> f = x => x.Sin();
 
             Interval a = new Interval(-1.0, -1.0);
             Interval b = new Interval(1.0, 1.0);
@@ -59,6 +59,8 @@ namespace SolversTests
             BigFloat epsilon = 1e-10;
 
             var result = Bisection.Eval(f, a, b, maxIter, epsilon);
+            
+            Console.WriteLine(result);
 
             Assert.Equal(EvalStatus.FULL_SUCCESS, result.Status);
             Assert.True(result.Value.Contains(0));
