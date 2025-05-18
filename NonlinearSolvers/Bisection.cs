@@ -10,6 +10,8 @@ public static class Bisection
 {
     public static Result<BigFloat> Eval(IFunction function, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
     {
+        BigFloat F(BigFloat n) => function.Eval(n);
+        
         if ((F(a) * F(b)) > new BigFloat(0))
             throw new ArgumentException("Function doesnt change its sign between a and b");
 
@@ -47,11 +49,13 @@ public static class Bisection
 
         return new Result<BigFloat>(EvalStatus.FULL_SUCCESS, iterations, (a + b) / 2);
 
-        BigFloat F(BigFloat n) => function.Eval(n);
+        
     }
 
     public static Result<Interval> Eval(IFunction function, Interval a, Interval b, int mit, BigFloat epsilon)
     {
+        Interval F(Interval n) => function.Eval(n);
+        
         BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
         BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
 
@@ -91,7 +95,7 @@ public static class Bisection
 
         return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, (a + b) / new Interval(2));
 
-        Interval F(Interval n) => function.Eval(n);
+        
     }
 
 

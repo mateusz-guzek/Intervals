@@ -23,35 +23,55 @@
                          SelectedItem="{Binding SelectedMode, Mode=TwoWay}" />
             </StackPanel>
             <Button Click="OnSelectLibraryButtonClicked">Załaduj bibliotekę z funkcjami</Button>
+            <ListBox IsVisible="{Binding Functions.Count}" ItemsSource="{Binding Functions}"
+                     SelectedItem="{Binding SelectedFunction}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding StringRepresentation}" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </StackPanel>
         <StackPanel Orientation="Vertical" Spacing="16">
-            <TextBlock>Przedział w którym znajduje się szukane miejsce zerowe:</TextBlock>
-            <StackPanel Orientation="Horizontal" Spacing="16">
-                <StackPanel Orientation="Vertical">
-                    <TextBlock>Lewa granica: </TextBlock>
-                    <StackPanel Orientation="Vertical" Spacing="4">
-                        <TextBox Width="128" Text="{Binding A1}"></TextBox>
-                        <TextBox Width="128" Text="{Binding A2}" IsVisible="{Binding IsArithmeticModeSelected, Mode=TwoWay}"></TextBox>
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Vertical" Spacing="16">
+                    <TextBlock>Przedział w którym znajduje się szukane miejsce zerowe:</TextBlock>
+                    <StackPanel Orientation="Horizontal" Spacing="16">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock>Lewa granica: </TextBlock>
+                            <StackPanel Orientation="Vertical" Spacing="4">
+                                <TextBox Width="128" Text="{Binding A1}"></TextBox>
+                                <TextBox Width="128" Text="{Binding A2}"
+                                         IsVisible="{Binding IsArithmeticModeSelected, Mode=TwoWay}">
+                                </TextBox>
+                            </StackPanel>
+
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock>Prawa granica:</TextBlock>
+                            <StackPanel Orientation="Vertical" Spacing="4">
+                                <TextBox Width="128" Text="{Binding B1}"></TextBox>
+                                <TextBox Width="128" Text="{Binding B2}"
+                                         IsVisible="{Binding IsArithmeticModeSelected, Mode=TwoWay}">
+                                </TextBox>
+                            </StackPanel>
+
+                        </StackPanel>
                     </StackPanel>
 
                 </StackPanel>
                 <StackPanel Orientation="Vertical">
-                    <TextBlock>Prawa granica:</TextBlock>
-                    <StackPanel Orientation="Vertical" Spacing="4">
-                        <TextBox Width="128" Text="{Binding B1}"></TextBox>
-                        <TextBox Width="128" Text="{Binding B2}" IsVisible="{Binding IsArithmeticModeSelected, Mode=TwoWay}"></TextBox>
-                    </StackPanel>
-
+                    <TextBlock>Wybierz metodę obliczeń:</TextBlock>
+                    <ListBox ItemsSource="{Binding Methods}"
+                             SelectedItem="{Binding SelectedMethod, Mode=TwoWay}" />
                 </StackPanel>
             </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <Button Command="{Binding onCalculateClicked}">Oblicz miejsce zerowe</Button>
+                
+            </StackPanel>
+        </StackPanel>
 
-        </StackPanel>
-        <StackPanel Orientation="Vertical">
-            <TextBlock>Wybierz metodę obliczeń:</TextBlock>
-            <ListBox ItemsSource="{Binding Methods}"
-                     SelectedItem="{Binding SelectedMethod, Mode=TwoWay}" />
-        </StackPanel>
-        
     </StackPanel>
 
 

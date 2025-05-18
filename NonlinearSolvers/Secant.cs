@@ -8,6 +8,8 @@ public class Secant
 {
     public static Result<BigFloat> Eval(IFunction function, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
     {
+        BigFloat F(BigFloat n) => function.Eval(n);
+        
         BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
         BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
 
@@ -37,12 +39,12 @@ public class Secant
         }
 
         return new Result<BigFloat>(EvalStatus.FULL_SUCCESS, iterations, x1);
-
-        BigFloat F(BigFloat n) => function.Eval(n);
     }
 
     public static Result<Interval> Eval(IFunction function, Interval a, Interval b, int mit, BigFloat epsilon)
     {
+        Interval F(Interval n) => function.Eval(n);
+        
         BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
         BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
 
@@ -70,7 +72,6 @@ public class Secant
         }
 
         return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, x1);
-
-        Interval F(Interval n) => function.Eval(n);
+        
     }
 }

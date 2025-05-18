@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Functions;
+using IntervalsDesktop.ViewModels;
 
 namespace IntervalsDesktop.Views;
 
@@ -18,40 +19,53 @@ public partial class MainWindow : Window
 
     public async void OnSelectLibraryButtonClicked(object? sender, RoutedEventArgs e)
     {
-        // Get top level from the current control. Alternatively, you can use Window reference instead.
-        var topLevel = TopLevel.GetTopLevel(this);
 
-        // Start async operation to open the dialog.
-        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        try
         {
-            Title = "Otwórz swoją bibliotekę",
-            AllowMultiple = false
-        });
+            // Get top level from the current control. Alternatively, you can use Window reference instead.
+            var topLevel = TopLevel.GetTopLevel(this);
 
-        if (files.Count >= 1)
-        {
-            string pathToDll = files[0].Path.AbsolutePath;
-
-            Assembly assembly = Assembly.LoadFrom(pathToDll);
-
-            // Znajdź typ implementujący IMyFunctions
-            Type? myFunctionsType = assembly
-                .GetTypes()
-                .FirstOrDefault(t => typeof(IMyFunctions).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
-
-            if (myFunctionsType != null)
+            // Start async operation to open the dialog.
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
             {
-                var instance = Activator.CreateInstance(myFunctionsType) as IMyFunctions;
+                Title = "Otwórz swoją bibliotekę",
+                AllowMultiple = false
+            });
 
-                if (instance != null)
+            if (files.Count >= 1)
+            {
+                string pathToDll = files[0].Path.AbsolutePath;
+
+                Assembly assembly = Assembly.LoadFrom(pathToDll);
+
+                // Znajdź typ implementujący IMyFunctions
+                Type? myFunctionsType = assembly
+                    .GetTypes()
+                    .FirstOrDefault(t => typeof(IMyFunctions).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+
+                if (myFunctionsType != null)
                 {
-                    var functions = instance.Functions();
-                    foreach (var func in functions)
+                    var instance = Activator.CreateInstance(myFunctionsType) as IMyFunctions;
+
+                    if (instance != null)
                     {
-                        Console.WriteLine(func.StringRepresentation);
+                        var functions = instance.Functions();
+                        if (DataContext is MainWindowViewModel viewModel)
+                        {
+                            foreach (var function in functions)
+                            {
+                                viewModel.Functions.Add(function);
+                            }
+                            
+                        }
+
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
         }
     }
 }

@@ -46,6 +46,22 @@ namespace Intervals
             this.end = end;
         }
 
+        public Interval(string number)
+        {
+            BigFloat start = BigFloat.Parse(number);
+            this.start = start - epsilon;
+            this.end = start + epsilon;
+        }
+
+        public Interval(string start, string end)
+        {
+            BigFloat x = BigFloat.Parse(start);
+            BigFloat y = BigFloat.Parse(end);
+            
+            this.start = x;
+            this.end = y;
+        }
+
         public Interval(BigFloat number)
         {
             start = number - epsilon;
