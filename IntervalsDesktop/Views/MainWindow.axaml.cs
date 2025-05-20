@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -29,7 +30,8 @@ public partial class MainWindow : Window
             var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
             {
                 Title = "Otwórz swoją bibliotekę",
-                AllowMultiple = false
+                AllowMultiple = false,
+                FileTypeFilter = new List<FilePickerFileType>(){new("dll")}
             });
 
             if (files.Count >= 1)

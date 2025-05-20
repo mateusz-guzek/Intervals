@@ -48,9 +48,9 @@ namespace Intervals
 
         public Interval(string number)
         {
-            BigFloat start = BigFloat.Parse(number);
-            this.start = start - epsilon;
-            this.end = start + epsilon;
+            BigFloat parsed = BigFloat.Parse(number);
+            this.start = parsed - epsilon;
+            this.end = parsed + epsilon;
         }
 
         public Interval(string start, string end)
