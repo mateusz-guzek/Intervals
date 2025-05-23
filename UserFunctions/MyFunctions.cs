@@ -16,8 +16,8 @@ public class MyFunctions : IMyFunctions
                 ),
             new UserFunction("f(x) = x * e^(sqrt(x+1))-1", 
                 x => x * BigFloat.Exp(BigFloat.Sqrt(x+1)) - new BigFloat(1),
-                x => x * x.Exp() * new Interval(1).Exp()),
-            new UserFunction("f(x) = cos(x)",
+                x => x * (x+new Interval(1)).Sqrt().Exp() - new Interval(1)),
+            new UserFunction("f(x) = sin^2(x) + sin(x)/2 - 1/2",
                 x =>
                 {
                     BigFloat s = BigFloat.Sin(x);

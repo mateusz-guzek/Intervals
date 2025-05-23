@@ -58,8 +58,8 @@ namespace Intervals
             BigFloat x = BigFloat.Parse(start);
             BigFloat y = BigFloat.Parse(end);
             
-            this.start = x;
-            this.end = y;
+            this.start = x - epsilon;
+            this.end = y + epsilon;
         }
 
         public Interval(BigFloat number)
@@ -255,8 +255,8 @@ namespace Intervals
 
         public Interval Sqrt()
         {
-            if (start < 0)
-                throw new ArgumentException("Cannot take square root of interval containing negative values.");
+            // if (start < 0)
+            //     throw new ArgumentException("Cannot take square root of interval containing negative values.");
             return new Interval(BigFloat.Sqrt(start), BigFloat.Sqrt(end));
         }
 
@@ -270,6 +270,10 @@ namespace Intervals
 
 
 
+        public BigFloat Midpoint()
+        {
+            return (BigFloat)((start + end) / new BigFloat(2));
+        }
 
         private static bool HasConverged(Interval prev, Interval next)
         {
@@ -278,6 +282,18 @@ namespace Intervals
                    RelDiff(prev.end, next.end) < eps;
         }
 
+        public BigFloat Distance(Interval interval)
+        {
+            if (this.start >= interval.Start && this.start <= interval.End)
+            {
+                return 0;
+            }
+
+            BigFloat distanceToLower = BigFloat.Abs(this.start - interval.End);
+            BigFloat distanceToUpper = BigFloat.Abs(this.start - interval.Start);
+            
+            return distanceToLower > distanceToUpper ? distanceToUpper : distanceToLower;
+        }
         private static BigFloat RelDiff(BigFloat a, BigFloat b)
         {
             if (a == 0.0) return BigFloat.Abs(b);

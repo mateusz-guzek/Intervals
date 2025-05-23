@@ -1,102 +1,73 @@
 <ClassicWindow xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:IntervalsDesktop.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:utility="clr-namespace:IntervalsDesktop.Utility"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="IntervalsDesktop.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
-        Width="800"
-        Height="450"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="Rozwiązywanie równań nieliniowych [Połowienie, Regula Falsi, Sieczne]"
-        Padding="16"
-        Margin="16"
-        CanResize="False"
-        FontSize="11">
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:vm="using:IntervalsDesktop.ViewModels"
+               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:utility="clr-namespace:IntervalsDesktop.Utility"
+               mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+               x:Class="IntervalsDesktop.Views.MainWindow"
+               x:DataType="vm:MainWindowViewModel"
+               Width="800"
+               Height="450"
+               Icon="/Assets/avalonia-logo.ico"
+               Title="Rozwiązywanie równań nieliniowych [Połowienie, Regula Falsi, Sieczne]"
+               Padding="16"
+               Margin="16"
+               CanResize="False"
+               FontSize="11">
 
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
-    
-    <Grid ColumnSpacing="8" RowSpacing="8">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*" />
-            <ColumnDefinition Width="4*" />
-            <ColumnDefinition Width="2*" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="1*" />
-            <RowDefinition Height="3*" />
-            <RowDefinition Height="12*" />
-        </Grid.RowDefinitions>
 
 
-        <TextBlock Grid.Row="0" Grid.Column="0">Wybierz rodzaj arytmetyki:</TextBlock>
-        <ListBox Grid.Row="1" Grid.Column="0" ItemsSource="{Binding ArithmeticModes}"
-                 SelectedItem="{Binding SelectedMode, Mode=TwoWay}" />
-        <TextBlock Grid.Row="0" Grid.Column="1">Podaj przedział poszukiwań:</TextBlock>
-        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical" Spacing="8">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="2*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0">Lewa granica: </TextBlock>
-                <TextBlock Grid.Row="1" Grid.Column="0">Prawa granica: </TextBlock>
-                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                    <TextBox Width="128" Text="{Binding A1}" Watermark="A" UseFloatingWatermark="True"></TextBox>
-                    <TextBox Width="128" Text="{Binding A2}" Watermark="A1" UseFloatingWatermark="True"
-                             Opacity="{Binding IsArithmeticModeSelected, Mode=TwoWay}">
-                    </TextBox>
-                </StackPanel>
-                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                    <TextBox Width="128" Text="{Binding B1}" Watermark="B" UseFloatingWatermark="True"></TextBox>
-                    <TextBox Width="128" Text="{Binding B2}" Watermark="B1" UseFloatingWatermark="True"
-                             Opacity="{Binding IsArithmeticModeSelected, Mode=TwoWay}">
-                    </TextBox>
-                </StackPanel>
+    <Grid ColumnSpacing="8" RowSpacing="8" ColumnDefinitions="2*,4*" RowDefinitions="4*,3*,12*">
+
+
+        <HeaderedContentControl Grid.Row="0" Grid.Column="1" Header="Przedział przeszukiwań">
+            <StackPanel Orientation="Vertical" Spacing="16" Margin="8">
+            <Grid RowDefinitions="1*,1*,4*" ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
+                <TextBlock Grid.Row="0" Grid.Column="0">Lewa Granica: </TextBlock>
+                <TextBox Grid.Row="0" Grid.Column="1" Width="128" Text="{Binding Start}" Watermark="A"></TextBox>
+                <TextBlock Grid.Row="0" Grid.Column="2">Liczba iteracji:</TextBlock>
+                <TextBox Grid.Row="0" Grid.Column="3" Width="128" Text="{Binding Iterations}"></TextBox>
+                <TextBlock Grid.Row="1" Grid.Column="0">Prawa Granica:</TextBlock>
+                <TextBox Grid.Row="1" Grid.Column="1" Width="128" Text="{Binding End}" Watermark="B"></TextBox>
+                <TextBlock Grid.Row="1" Grid.Column="2">Epsilon ε:</TextBlock>
+                <TextBox Grid.Row="1" Grid.Column="3" Width="128" Text="{Binding Epsilon}"
+                         Watermark="np. 1e-20 lub 0.00001"/>
+                
             </Grid>
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock>Epsilon:</TextBlock>
-                    <TextBox Width="128" Text="{Binding Epsilon}" Watermark="np. 1e-20 lub 0.00001"></TextBox>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock>Iteracje: </TextBlock>
-                    <TextBox Width="128" Text="{Binding Iterations}"></TextBox>
-                </StackPanel>
-            </StackPanel>
+        </StackPanel>
+        </HeaderedContentControl>
+        <StackPanel Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Orientation="Vertical" Spacing="8">
+
             
-
-        </StackPanel>
-        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" Spacing="8">
-
-            <Button Command="{Binding onCalculateClicked}">Oblicz miejsce zerowe</Button>
-            <TextBlock>Wyniki:</TextBlock>
-            <TextBox Focusable="False" Height="256" MaxHeight="256" MaxWidth="440" TextWrapping="Wrap"
-                     AcceptsReturn="True" Text="{Binding OutputField}" Watermark="Tutaj pojawią się wyniki">
-
-            </TextBox>
+            <Button Command="{Binding OnCalculateClicked}">Oblicz miejsce zerowe</Button>
+            <HeaderedContentControl Header="Wyniki">
+            <TextBox Focusable="False" Height="256" MaxHeight="256" MaxWidth="" TextWrapping="Wrap"
+                     AcceptsReturn="True" Text="{Binding OutputField}" Watermark="Tutaj pojawią się wyniki"/>
+            </HeaderedContentControl>
 
 
         </StackPanel>
-        <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Vertical" Spacing="10">
-            
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Spacing="8">
+            <HeaderedContentControl Header="Rodzaj arytmetyki">
+            <ListBox Classes="RadioButtonListBox" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding ArithmeticModes}"
+                     SelectedItem="{Binding SelectedMode, Mode=TwoWay}" />
+            </HeaderedContentControl>
+            <HeaderedContentControl Header="Metoda obliczeń">
+            <ListBox Classes="RadioButtonListBox" ItemsSource="{Binding Methods}"
+                     SelectedItem="{Binding SelectedMethod, Mode=TwoWay}" />
+            </HeaderedContentControl>
+
         </StackPanel>
-        <TextBlock Grid.Row="0" Grid.Column="2">Wybierz metodę obliczeń:</TextBlock>
-        <ListBox Grid.Row="1" Grid.Column="2" ItemsSource="{Binding Methods}"
-                 SelectedItem="{Binding SelectedMethod, Mode=TwoWay}" />
 
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical" Spacing="8">
-            <Button Click="OnSelectLibraryButtonClicked">Załaduj funkcje</Button>
-            <ListBox IsVisible="{Binding Functions.Count}" ItemsSource="{Binding Functions}"
+            <Button IsVisible="{Binding !Functions.Count}" Click="OnSelectLibraryButtonClicked">Załaduj funkcje</Button>
+            
+            <HeaderedContentControl IsVisible="{Binding Functions.Count}" Header="Badana funkcja">
+            <ListBox ItemsSource="{Binding Functions}"
                      SelectedItem="{Binding SelectedFunction}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
@@ -104,72 +75,9 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+            </HeaderedContentControl>
         </StackPanel>
-
-
     </Grid>
-
-    <!-- <StackPanel Orientation="Horizontal" Spacing="16"> -->
-    <!--     <StackPanel Orientation="Vertical" Spacing="16"> -->
-    <!--         <StackPanel Orientation="Vertical" Spacing="16"> -->
-    <!--             <TextBlock>Wybierz rodzaj arytmetyki:</TextBlock> -->
-    <!--             <ListBox ItemsSource="{Binding ArithmeticModes}" -->
-    <!--                      SelectedItem="{Binding SelectedMode, Mode=TwoWay}" /> -->
-    <!--         </StackPanel> -->
-    <!--         <Button Click="OnSelectLibraryButtonClicked">Załaduj bibliotekę z funkcjami</Button> -->
-    <!--         <ListBox IsVisible="{Binding Functions.Count}" ItemsSource="{Binding Functions}" -->
-    <!--                  SelectedItem="{Binding SelectedFunction}"> -->
-    <!--             <ListBox.ItemTemplate> -->
-    <!--                 <DataTemplate> -->
-    <!--                     <TextBlock Text="{Binding StringRepresentation}" /> -->
-    <!--                 </DataTemplate> -->
-    <!--             </ListBox.ItemTemplate> -->
-    <!--         </ListBox> -->
-    <!--     </StackPanel> -->
-    <!--     <StackPanel Orientation="Vertical" Spacing="16"> -->
-    <!--         <StackPanel Orientation="Horizontal" Spacing="16"> -->
-    <!--             <StackPanel Orientation="Vertical" Spacing="16"> -->
-    <!--                 <TextBlock>Przedział w którym znajduje się szukane miejsce zerowe:</TextBlock> -->
-    <!--                 <StackPanel Orientation="Horizontal" Spacing="16"> -->
-    <!--                     <StackPanel Orientation="Vertical"> -->
-    <!--                         <TextBlock>Lewa granica: </TextBlock> -->
-    <!--                         <StackPanel Orientation="Vertical" Spacing="4"> -->
-    <!--                             <TextBox Width="128" Text="{Binding A1}"></TextBox> -->
-    <!--                             <TextBox Width="128" Text="{Binding A2}" -->
-    <!--                                      IsVisible="{Binding IsArithmeticModeSelected, Mode=TwoWay}"> -->
-    <!--                             </TextBox> -->
-    <!--                         </StackPanel> -->
-    <!-- -->
-    <!--                     </StackPanel> -->
-    <!--                     <StackPanel Orientation="Vertical"> -->
-    <!--                         <TextBlock>Prawa granica:</TextBlock> -->
-    <!--                         <StackPanel Orientation="Vertical" Spacing="4"> -->
-    <!--                             <TextBox Width="128" Text="{Binding B1}"></TextBox> -->
-    <!--                             <TextBox Width="128" Text="{Binding B2}" -->
-    <!--                                      IsVisible="{Binding IsArithmeticModeSelected, Mode=TwoWay}"> -->
-    <!--                             </TextBox> -->
-    <!--                         </StackPanel> -->
-    <!-- -->
-    <!--                     </StackPanel> -->
-    <!--                 </StackPanel> -->
-    <!-- -->
-    <!--             </StackPanel> -->
-    <!--             <StackPanel Orientation="Vertical"> -->
-    <!--                 <TextBlock>Wybierz metodę obliczeń:</TextBlock> -->
-    <!--                 <ListBox ItemsSource="{Binding Methods}" -->
-    <!--                          SelectedItem="{Binding SelectedMethod, Mode=TwoWay}" /> -->
-    <!--             </StackPanel> -->
-    <!--         </StackPanel> -->
-    <!--         <StackPanel Orientation="Vertical" Spacing="8"> -->
-    <!--             <Button Command="{Binding onCalculateClicked}">Oblicz miejsce zerowe</Button> -->
-    <!--             <TextBox Focusable="False" Height="256" MaxHeight="256" MaxWidth="440" TextWrapping="Wrap" AcceptsReturn="True" Text="{Binding OutputField}" > -->
-    <!-- -->
-    <!--             </TextBox> -->
-    <!-- -->
-    <!--         </StackPanel> -->
-    <!--     </StackPanel> -->
-    <!-- -->
-    <!-- </StackPanel> -->
 
 
 </ClassicWindow>

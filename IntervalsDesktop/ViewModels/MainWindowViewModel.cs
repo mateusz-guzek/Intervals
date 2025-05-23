@@ -6,9 +6,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Classic.CommonControls.Dialogs;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Functions;
 using Nonlinear_Solvers;
@@ -20,6 +23,7 @@ namespace IntervalsDesktop.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
+    
     public List<string> ArithmeticModes { get; } = new()
     {
         "Standardowa",
@@ -48,17 +52,14 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty] private string _selectedMethod = "Metoda połowienia";
 
-    [ObservableProperty] private string _a1 = "";
-    [ObservableProperty] private string _a2 = "";
-    [ObservableProperty] private string _b1 = "";
-    [ObservableProperty] private string _b2 = "";
+    [ObservableProperty] private string _start = "";
+    [ObservableProperty] private string _end = "";
 
-    
 
     [ObservableProperty] private bool _isArithmeticModeSelected;
 
     public ObservableCollection<IFunction> Functions { get; } = new();
-    [ObservableProperty] private IFunction _selectedFunction;
+    [ObservableProperty] private IFunction? _selectedFunction;
 
 
     [ObservableProperty] private Result<Intervals.Interval> _intervalResult;
@@ -70,13 +71,16 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private int _iterations;
 
 
-    public async void onCalculateClicked()
+    public void OnCalculateClicked()
     {
-
         try
         {
-            var a = BigFloat.Parse(A1.Trim(), AccuracyGoal.Absolute(20));
-            var b = BigFloat.Parse(B1.Trim(), AccuracyGoal.Absolute(20));
+            var valid = AreInputsValid();
+            if (!valid) return;
+
+
+            var a = BigFloat.Parse(Start.Trim(), AccuracyGoal.Absolute(20));
+            var b = BigFloat.Parse(End.Trim(), AccuracyGoal.Absolute(20));
 
             var epsilon = BigFloat.Parse(Epsilon.Trim());
 
@@ -84,39 +88,56 @@ public partial class MainWindowViewModel : ViewModelBase
 
             if (SelectedMode == "Standardowa")
             {
+                Console.WriteLine(SelectedFunction.StringRepresentation);
                 Result<BigFloat> BigFloatResult;
                 if (SelectedMethod == "Metoda połowienia")
                 {
-                    BigFloatResult = Bisection.Eval(SelectedFunction, a, b, 100, epsilon);
+                    BigFloatResult = Bisection.EvalR(SelectedFunction, a, b, 100, epsilon);
                     OutputField = MakeOutputString(BigFloatResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Regula Falsi")
                 {
-                    BigFloatResult = RegulaFalsi.Eval(SelectedFunction, a, b, 100, epsilon);
+                    BigFloatResult = RegulaFalsi.EvalR(SelectedFunction, a, b, 100, epsilon);
                     OutputField = MakeOutputString(BigFloatResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Metoda siecznych")
                 {
-                    BigFloatResult = Secant.Eval(SelectedFunction, a, b, 100, epsilon);
+                    BigFloatResult = Secant.EvalR(SelectedFunction, a, b, 100, epsilon);
                     OutputField = MakeOutputString(BigFloatResult, SelectedFunction, epsilon, SelectedMethod);
                 }
             }
-            else
+            else if (SelectedMode == "Przedziałowa")
             {
-                // dodatkowo dla koncow przedzialu
-                var a1 = BigFloat.Parse(A2.Trim());
-                var b1 = BigFloat.Parse(B2.Trim());
+                Result<Interval> IntervalResult;
+                if (SelectedMethod == "Metoda połowienia")
+                {
+                    IntervalResult = Bisection.EvalI(SelectedFunction, a, b, 100, epsilon);
+                    OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
+                }
+
+                if (SelectedMethod == "Regula Falsi")
+                {
+                    IntervalResult = RegulaFalsi.EvalI(SelectedFunction, a, b, 100, epsilon);
+                    OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
+                }
+
+                if (SelectedMethod == "Metoda siecznych")
+                {
+                    IntervalResult = Secant.EvalI(SelectedFunction, a, b, 100, epsilon);
+                    OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
+                }
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine(ex.Message);
+            Console.WriteLine(e.Message);
+            OutputField = "Wystąpił niespodziewany błąd.";
         }
     }
 
-    private string MakeOutputString<T>(Result<T> result, IFunction function, BigFloat epsilon,
+    private static string MakeOutputString<T>(Result<T> result, IFunction function, BigFloat epsilon,
         string method)
     {
         var sb = new StringBuilder();
@@ -151,7 +172,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         // Wypisz wynik tylko jeśli istnieje
-        if ((result.Status & (EvalStatus.FULL_SUCCESS | EvalStatus.NOT_ACCURATE)) != 0)
+        if (result.Value is not null)
         {
             sb.AppendLine($"X\u2080: {result.Value.ToString()}");
         }
@@ -160,8 +181,53 @@ public partial class MainWindowViewModel : ViewModelBase
             sb.AppendLine("X\u2080: brak wartości.");
         }
 
-        
 
         return sb.ToString();
+    }
+
+    private bool AreInputsValid()
+    {
+        StringBuilder stringBuilder = new StringBuilder();
+        bool isValid = true;
+
+        if (SelectedFunction == null)
+        {
+            stringBuilder.AppendLine("- Nie wybrałeś badanej funkcji!");
+            isValid = false;
+        }
+
+        try
+        {
+            BigFloat.Parse(Start);
+        }
+        catch (FormatException)
+        {
+            stringBuilder.AppendLine("- Źle podany początek przedziału!");
+            isValid = false;
+        }
+
+        try
+        {
+            BigFloat.Parse(End);
+        }
+        catch (FormatException)
+        {
+            stringBuilder.AppendLine("- Źle podany koniec przedziału!");
+            isValid = false;
+        }
+
+        try
+        {
+            BigFloat.Parse(Epsilon);
+        }
+        catch (FormatException)
+        {
+            stringBuilder.AppendLine("- Źle podany Epsilon!");
+            isValid = false;
+        }
+        
+        OutputField = stringBuilder.ToString();
+
+        return isValid;
     }
 }

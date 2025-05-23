@@ -6,95 +6,140 @@ namespace Nonlinear_Solvers;
 
 public class Secant
 {
-    public static Result<BigFloat> Eval(IFunction function, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
+    public static Result<BigFloat> EvalR(IFunction function, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
     {
-        BigFloat F(BigFloat n) => function.Eval(n);
+        BigFloat F(BigFloat x) => function.Eval(x);
 
+        // Ustawiamy cele dokładności (opcjonalne, ale zgodne ze stylem EvalR)
         BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
         BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
 
-        BigFloat fa = F(a); // -1
-        BigFloat fb = F(b); // 13
+        // Początkowe obliczenia: korekta przedziału [a, b]
+        BigFloat h = new BigFloat(0.179372) * (b - a);
+        a += h;
+        b -= h;
 
-        if ((fa * fb) > BigFloat.Zero)
+        BigFloat fa = F(a);
+        BigFloat fb = F(b);
+
+        // Jeśli |fa| < |fb|, zamieniamy punkty tak, by |fa| >= |fb|
+        if (BigFloat.Abs(fa) < BigFloat.Abs(fb))
         {
-            return new Result<BigFloat>(EvalStatus.NO_SIGN_CHANGE, 0, BigFloat.Zero);
+            (a, b) = (b, a);
+            (fa, fb) = (fb, fa);
         }
 
         epsilon = BigFloat.Abs(epsilon);
-
+        BigFloat xn = b;
         int iterations = 0;
-
-        BigFloat x0 = a; // 1
-        BigFloat x1 = b; // 4
-        BigFloat xn = x1; // 4
 
         while (iterations < mit)
         {
             iterations++;
-            BigFloat fx0 = F(x0);
-            BigFloat fx1 = F(x1);
 
-            BigFloat denominator = fx1 - fx0;
-
-            if (denominator.IsZero)
+            BigFloat denom = fa - fb;
+            if (denom.IsZero)
             {
-                return new Result<BigFloat>(EvalStatus.DIVISION_BY_ZERO, iterations, BigFloat.Zero);
+                return new Result<BigFloat>(
+                    EvalStatus.DIVISION_BY_ZERO,
+                    iterations,
+                    BigFloat.Zero);
             }
 
-            xn = (fx1 * x0 - fx0 * x1) / denominator;
+            // wzór interpolacji liniowej:
+            // x = b + fb * (b - a) / (fa - fb)
+            xn = b + fb * (b - a) / denom;
+            BigFloat fxn = F(xn);
 
-            // Warunek zbieżności
-            if (BigFloat.Abs(F(xn)) <= epsilon)
+            if (BigFloat.Abs(fxn) <= epsilon)
             {
-                Console.WriteLine(xn.GetDecimalDigits());
-                return new Result<BigFloat>(EvalStatus.FULL_SUCCESS, iterations, xn);
+                return new Result<BigFloat>(
+                    EvalStatus.FULL_SUCCESS,
+                    iterations,
+                    xn);
             }
 
-            x0 = x1;
-            x1 = xn;
-            
+            // przesuwamy przedziały:
+            fa = fb;
+            fb = fxn;
+            a = b;
+            b = xn;
         }
 
-        return new Result<BigFloat>(EvalStatus.NO_CONVERGENCE, iterations, xn);
+        // brak zbieżności w wyznaczonej liczbie iteracji
+        return new Result<BigFloat>(
+            EvalStatus.NO_CONVERGENCE,
+            iterations,
+            xn);
     }
 
-
-    public static Result<Interval> Eval(IFunction function, Interval a, Interval b, int mit, BigFloat epsilon)
+    public static Result<Interval> EvalI(IFunction function, BigFloat start, BigFloat end, int mit, BigFloat epsilon)
     {
-        Interval F(Interval n) => function.Eval(n);
+    // Konwerter na przedziały
+    Interval a = new Interval(start);
+    Interval b = new Interval(end);
+    Interval F(Interval x) => function.Eval(x);
 
-        BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
-        BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
+    // Ustawienia dokładności BigFloat
+    BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
+    BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
 
-        if (!(F(a) * F(b)).ContainsNegative())
-            return new Result<Interval>(EvalStatus.NO_SIGN_CHANGE, 0, null);
+    // 1) Przesunięcie krańców przedziału zgodnie z Pascalowym oryginałem
+    Interval h = new Interval(new BigFloat(0.179372)) * (b - a);
+    a += h;
+    b -= h;
 
+    // 2) Obliczenie wartości funkcji na skorygowanym przedziale
+    Interval fa = F(a);
+    Interval fb = F(b);
 
-        epsilon = BigFloat.Abs(epsilon);
+    // 3) Jeżeli funkcja nie zmienia znaku na [a,b], nie ma pierwiastka
+    if (!(fa * fb).ContainsNegative())
+    {
+        return new Result<Interval>(EvalStatus.NO_SIGN_CHANGE, 0, null);
+    }
 
-        int iterations = 0;
+    // 4) Jeżeli przekazanie dokładności, uproszczony warunek stopu
+    epsilon = BigFloat.Abs(epsilon);
+    int iterations = 0;
 
-        Interval x0 = a;
-        Interval x1 = b;
+    // 5) Zamiana a<->b, fa<->fb, gdy |mid(fa)| < |mid(fb)| 
+    //    (przybliżenie zgodne z porównaniem modułów w wersji nie-intervalnej)
+    BigFloat midFa = BigFloat.Abs(fa.Midpoint());
+    BigFloat midFb = BigFloat.Abs(fb.Midpoint());
+    if (midFa < midFb)
+    {
+        (a, b) = (b, a);
+        (fa, fb) = (fb, fa);
+    }
 
-        Interval xn = (F(x1) * x0 - F(x0) * x1) / (F(x1) - F(x0));
-        x0 = x1;
-        x1 = xn;
+    // 6) Iteracyjna interpolacja liniowa w pętli
+    while (iterations < mit)
+    {
+        iterations++;
 
-        while (iterations < mit)
+        Interval denom = fa - fb;
+        if (denom.Contains(new BigFloat(0)))
         {
-            iterations++;
-            xn = (F(x1) * x0 - F(x0) * x1) / (F(x1) - F(x0));
-            x0 = x1;
-            x1 = xn;
-
-            if (x1.Width() < epsilon)
-            {
-                return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, x1);
-            }
+            return new Result<Interval>(EvalStatus.DIVISION_BY_ZERO, iterations, null);
         }
 
-        return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, x1);
+        // x = b + fb*(b-a)/(fa-fb)
+        Interval xn = b + fb * (b - a) / denom;
+        Interval fxn = F(xn);
+
+        // Warunek stopu: szerokość przedziału wartości <= epsilon
+        if (fxn.Width() <= epsilon)
+        {
+            return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, xn);
+        }
+
+        // Przesuwamy punkty: a←b, fa←fb; b←xn, fb←fxn
+        a = b;    fa = fb;
+        b = xn;   fb = fxn;
     }
+
+    // Jeżeli nie udało się zbiec w limicie iteracji
+    return new Result<Interval>(EvalStatus.NO_CONVERGENCE, iterations, b);
+}
 }
