@@ -27,7 +27,7 @@ namespace Intervals
     public class Interval
     {
 
-        private BigFloat epsilon = 1e-20;
+        private BigFloat epsilon = 1e-17;
 
         private BigFloat start;
         private BigFloat end;

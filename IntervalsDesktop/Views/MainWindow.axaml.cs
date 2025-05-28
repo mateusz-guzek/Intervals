@@ -23,10 +23,9 @@ public partial class MainWindow : Window
 
         try
         {
-            // Get top level from the current control. Alternatively, you can use Window reference instead.
+       
             var topLevel = TopLevel.GetTopLevel(this);
-
-            // Start async operation to open the dialog.
+            
             var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
             {
                 Title = "Otwórz swoją bibliotekę",
@@ -39,8 +38,7 @@ public partial class MainWindow : Window
                 string pathToDll = files[0].Path.AbsolutePath;
 
                 Assembly assembly = Assembly.LoadFrom(pathToDll);
-
-                // Znajdź typ implementujący IMyFunctions
+                
                 Type? myFunctionsType = assembly
                     .GetTypes()
                     .FirstOrDefault(t => typeof(IMyFunctions).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);

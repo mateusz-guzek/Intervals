@@ -10,7 +10,7 @@
     </Application.DataTemplates>
   
     <Application.Styles>
-        <ClassicTheme FontAliasing="True" />
+        <SimpleTheme/>
         
         <Style Selector="ListBox.RadioButtonListBox">
             <Setter Property="BorderBrush" Value="Transparent"/>
@@ -22,6 +22,7 @@
                     <ControlTemplate>
                         <Border Background="Transparent">
                             <RadioButton Content="{TemplateBinding ContentPresenter.Content}"
+                                         Margin="2"
                                          VerticalAlignment="Center"
                                          IsChecked="{Binding Path=IsSelected,RelativeSource={RelativeSource TemplatedParent},Mode=TwoWay}"/>
                         </Border>

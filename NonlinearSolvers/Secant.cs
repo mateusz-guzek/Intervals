@@ -18,15 +18,12 @@ public class Secant
         BigFloat h = new BigFloat(0.179372) * (b - a);
         a += h;
         b -= h;
-
-        BigFloat fa = F(a);
-        BigFloat fb = F(b);
+        
 
         // Jeśli |fa| < |fb|, zamieniamy punkty tak, by |fa| >= |fb|
-        if (BigFloat.Abs(fa) < BigFloat.Abs(fb))
+        if (BigFloat.Abs(F(a)) < BigFloat.Abs(F(b)))
         {
             (a, b) = (b, a);
-            (fa, fb) = (fb, fa);
         }
 
         epsilon = BigFloat.Abs(epsilon);
@@ -37,7 +34,7 @@ public class Secant
         {
             iterations++;
 
-            BigFloat denom = fa - fb;
+            BigFloat denom = F(a) - F(b);
             if (denom.IsZero)
             {
                 return new Result<BigFloat>(
@@ -48,7 +45,7 @@ public class Secant
 
             // wzór interpolacji liniowej:
             // x = b + fb * (b - a) / (fa - fb)
-            xn = b + fb * (b - a) / denom;
+            xn = b + F(b) * (b - a) / denom;
             BigFloat fxn = F(xn);
 
             if (BigFloat.Abs(fxn) <= epsilon)
@@ -60,8 +57,6 @@ public class Secant
             }
 
             // przesuwamy przedziały:
-            fa = fb;
-            fb = fxn;
             a = b;
             b = xn;
         }
@@ -73,73 +68,48 @@ public class Secant
             xn);
     }
 
-    public static Result<Interval> EvalI(IFunction function, BigFloat start, BigFloat end, int mit, BigFloat epsilon)
+    public static Result<Interval> EvalI(IFunction function, Interval a, Interval b, int mit, BigFloat epsilon)
     {
-    // Konwerter na przedziały
-    Interval a = new Interval(start);
-    Interval b = new Interval(end);
-    Interval F(Interval x) => function.Eval(x);
+        Interval F(Interval x) => function.Eval(x);
+        
+        BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
+        BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
 
-    // Ustawienia dokładności BigFloat
-    BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
-    BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
+        List<Interval> intervals = new List<Interval>();
 
-    // 1) Przesunięcie krańców przedziału zgodnie z Pascalowym oryginałem
-    Interval h = new Interval(new BigFloat(0.179372)) * (b - a);
-    a += h;
-    b -= h;
+        
 
-    // 2) Obliczenie wartości funkcji na skorygowanym przedziale
-    Interval fa = F(a);
-    Interval fb = F(b);
+        
+        // if (!(F(a) * F(b)).ContainsNegative())
+        // {
+        //     return new Result<Interval>(EvalStatus.NO_SIGN_CHANGE, 0, null);
+        // }
 
-    // 3) Jeżeli funkcja nie zmienia znaku na [a,b], nie ma pierwiastka
-    if (!(fa * fb).ContainsNegative())
-    {
-        return new Result<Interval>(EvalStatus.NO_SIGN_CHANGE, 0, null);
-    }
-
-    // 4) Jeżeli przekazanie dokładności, uproszczony warunek stopu
-    epsilon = BigFloat.Abs(epsilon);
-    int iterations = 0;
-
-    // 5) Zamiana a<->b, fa<->fb, gdy |mid(fa)| < |mid(fb)| 
-    //    (przybliżenie zgodne z porównaniem modułów w wersji nie-intervalnej)
-    BigFloat midFa = BigFloat.Abs(fa.Midpoint());
-    BigFloat midFb = BigFloat.Abs(fb.Midpoint());
-    if (midFa < midFb)
-    {
-        (a, b) = (b, a);
-        (fa, fb) = (fb, fa);
-    }
-
-    // 6) Iteracyjna interpolacja liniowa w pętli
-    while (iterations < mit)
-    {
-        iterations++;
-
-        Interval denom = fa - fb;
-        if (denom.Contains(new BigFloat(0)))
+        Interval outcache = new Interval(0);
+        int iterations = 0;
+        do
         {
-            return new Result<Interval>(EvalStatus.DIVISION_BY_ZERO, iterations, null);
-        }
+            iterations++;
+            Interval denom = F(a) - F(b);
+            if (denom.Contains(0))
+            {
+                return new Result<Interval>(EvalStatus.DIVISION_BY_ZERO, iterations, intervals.MinBy(interval => interval.Width()));
+            }
+            Interval xn = (F(a) * b - F(b) * a) / denom;
+            if(F(xn).Contains(0))
+                intervals.Add(xn);
+            outcache = xn;
 
-        // x = b + fb*(b-a)/(fa-fb)
-        Interval xn = b + fb * (b - a) / denom;
-        Interval fxn = F(xn);
+            if (F(xn).Width() < epsilon && F(xn).Contains(0))
+            {
+                return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, xn);
+            }
 
-        // Warunek stopu: szerokość przedziału wartości <= epsilon
-        if (fxn.Width() <= epsilon)
-        {
-            return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, xn);
-        }
+            a = b;
+            b = xn;
 
-        // Przesuwamy punkty: a←b, fa←fb; b←xn, fb←fxn
-        a = b;    fa = fb;
-        b = xn;   fb = fxn;
+        } while(iterations < mit);
+        
+        return new Result<Interval>(EvalStatus.NOT_ACCURATE, iterations, outcache);
     }
-
-    // Jeżeli nie udało się zbiec w limicie iteracji
-    return new Result<Interval>(EvalStatus.NO_CONVERGENCE, iterations, b);
-}
 }

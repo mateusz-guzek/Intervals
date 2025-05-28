@@ -53,12 +53,10 @@ public static class Bisection
         
     }
 
-    public static Result<Interval> EvalI(IFunction function, BigFloat start, BigFloat end, int mit, BigFloat epsilon)
+    public static Result<Interval> EvalI(IFunction function, Interval a, Interval b, int mit, BigFloat epsilon)
     {
         Interval F(Interval n) => function.Eval(n);
-
-        Interval a = new Interval(start);
-        Interval b = new Interval(end);
+        
         
         BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
         BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
@@ -71,14 +69,15 @@ public static class Bisection
 
         int iterations = 0;
 
-        while (BigFloat.Abs(b.End - a.Start) > epsilon)
+        while (BigFloat.Abs(a.Start - b.End) > epsilon)
         {
             iterations++;
 
-            BigFloat midPoint = (a.Start + b.End) / 2;
-            Interval mid = new Interval(midPoint, midPoint);
+            Interval mid = (a + b) / new Interval(2);
+            //BigFloat midPoint = (a.Start + b.End) / 2;
+            //Interval mid = new Interval(midPoint);
 
-            if (F(mid).Contains(0) && BigFloat.Abs(mid.End - mid.Start) < epsilon)
+            if (F(mid).Contains(0) && F(mid).Width() < epsilon)
                 return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, mid);
 
             if ((F(a) * F(mid)).ContainsNegative())

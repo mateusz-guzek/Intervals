@@ -21,31 +21,34 @@
     </Design.DataContext>
 
 
-    <Grid ColumnSpacing="8" RowSpacing="8" ColumnDefinitions="2*,4*" RowDefinitions="4*,3*,12*">
+    <Grid ColumnSpacing="8" RowSpacing="8" ColumnDefinitions="2*,4*" RowDefinitions="7*,3*,12*">
 
 
-        <HeaderedContentControl Grid.Row="0" Grid.Column="1" Header="Przedział przeszukiwań">
+        <HeaderedContentControl Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Header="Przedział przeszukiwań">
             <StackPanel Orientation="Vertical" Spacing="16" Margin="8">
-            <Grid RowDefinitions="1*,1*,4*" ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
-                <TextBlock Grid.Row="0" Grid.Column="0">Lewa Granica: </TextBlock>
+            <Grid RowDefinitions="1*,1*,1*,1*" ColumnDefinitions="*,*,*,*" ColumnSpacing="16" RowSpacing="8">
+                <TextBlock Grid.Row="0" Grid.Column="0" TextAlignment="Right">Lewa Granica: </TextBlock>
                 <TextBox Grid.Row="0" Grid.Column="1" Width="128" Text="{Binding Start}" Watermark="A"></TextBox>
-                <TextBlock Grid.Row="0" Grid.Column="2">Liczba iteracji:</TextBlock>
-                <TextBox Grid.Row="0" Grid.Column="3" Width="128" Text="{Binding Iterations}"></TextBox>
-                <TextBlock Grid.Row="1" Grid.Column="0">Prawa Granica:</TextBlock>
+                <TextBox Grid.Row="0" Grid.Column="2" Width="128" IsVisible="{Binding IsArithmeticModeSelected}" Text="{Binding Start1}" Watermark="A1"></TextBox>
+                
+                <TextBlock Grid.Row="1" Grid.Column="0" TextAlignment="Right">Prawa Granica:</TextBlock>
                 <TextBox Grid.Row="1" Grid.Column="1" Width="128" Text="{Binding End}" Watermark="B"></TextBox>
-                <TextBlock Grid.Row="1" Grid.Column="2">Epsilon ε:</TextBlock>
-                <TextBox Grid.Row="1" Grid.Column="3" Width="128" Text="{Binding Epsilon}"
+                <TextBox Grid.Row="1" Grid.Column="2" Width="128" IsVisible="{Binding IsArithmeticModeSelected}" Text="{Binding End1}" Watermark="B1"></TextBox>
+                <TextBlock Grid.Row="2" Grid.Column="0" TextAlignment="Right">Liczba iteracji:</TextBlock>
+                <TextBox Grid.Row="2" Grid.Column="1" Width="128" Text="{Binding Iterations}"></TextBox>
+                <TextBlock Grid.Row="3" Grid.Column="0" TextAlignment="Right">Epsilon ε:</TextBlock>
+                <TextBox Grid.Row="3" Grid.Column="1" Width="128" Text="{Binding Epsilon}"
                          Watermark="np. 1e-20 lub 0.00001"/>
                 
             </Grid>
         </StackPanel>
         </HeaderedContentControl>
-        <StackPanel Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Orientation="Vertical" Spacing="8">
+        <StackPanel Grid.Row="2" Grid.RowSpan="1" Grid.Column="1" Orientation="Vertical" Spacing="8">
 
             
             <Button Command="{Binding OnCalculateClicked}">Oblicz miejsce zerowe</Button>
             <HeaderedContentControl Header="Wyniki">
-            <TextBox Focusable="False" Height="256" MaxHeight="256" MaxWidth="" TextWrapping="Wrap"
+            <TextBox Focusable="False" Height="1000" MaxHeight="175" MaxWidth="" TextWrapping="Wrap"
                      AcceptsReturn="True" Text="{Binding OutputField}" Watermark="Tutaj pojawią się wyniki"/>
             </HeaderedContentControl>
 

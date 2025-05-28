@@ -27,7 +27,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public List<string> ArithmeticModes { get; } = new()
     {
         "Standardowa",
-        "Przedziałowa"
+        "Automatyczna Przedziałowa",
+        "Manualna Przedziałowa"
     };
 
 
@@ -38,7 +39,7 @@ public partial class MainWindowViewModel : ViewModelBase
         get => _selectedMode;
         set
         {
-            IsArithmeticModeSelected = value == "Przedziałowa";
+            IsArithmeticModeSelected = value == "Manualna Przedziałowa";
             _selectedMode = value;
         }
     }
@@ -54,6 +55,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty] private string _start = "";
     [ObservableProperty] private string _end = "";
+    
+    [ObservableProperty] private string _start1 = "";
+    [ObservableProperty] private string _end1 = "";
 
 
     [ObservableProperty] private bool _isArithmeticModeSelected;
@@ -92,45 +96,69 @@ public partial class MainWindowViewModel : ViewModelBase
                 Result<BigFloat> BigFloatResult;
                 if (SelectedMethod == "Metoda połowienia")
                 {
-                    BigFloatResult = Bisection.EvalR(SelectedFunction, a, b, 100, epsilon);
+                    BigFloatResult = Bisection.EvalR(SelectedFunction, a, b, Iterations, epsilon);
                     OutputField = MakeOutputString(BigFloatResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Regula Falsi")
                 {
-                    BigFloatResult = RegulaFalsi.EvalR(SelectedFunction, a, b, 100, epsilon);
+                    BigFloatResult = RegulaFalsi.EvalR(SelectedFunction, a, b, Iterations, epsilon);
                     OutputField = MakeOutputString(BigFloatResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Metoda siecznych")
                 {
-                    BigFloatResult = Secant.EvalR(SelectedFunction, a, b, 100, epsilon);
+                    BigFloatResult = Secant.EvalR(SelectedFunction, a, b, Iterations, epsilon);
                     OutputField = MakeOutputString(BigFloatResult, SelectedFunction, epsilon, SelectedMethod);
                 }
             }
-            else if (SelectedMode == "Przedziałowa")
+            else if (SelectedMode == "Automatyczna Przedziałowa")
             {
                 Result<Interval> IntervalResult;
                 if (SelectedMethod == "Metoda połowienia")
                 {
-                    IntervalResult = Bisection.EvalI(SelectedFunction, a, b, 100, epsilon);
+                    IntervalResult = Bisection.EvalI(SelectedFunction, new Interval(a+epsilon), new Interval(b-epsilon), Iterations, epsilon);
                     OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Regula Falsi")
                 {
-                    IntervalResult = RegulaFalsi.EvalI(SelectedFunction, a, b, 100, epsilon);
+                    IntervalResult = RegulaFalsi.EvalI(SelectedFunction, new Interval(a+epsilon), new Interval(b-epsilon), Iterations, epsilon);
                     OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Metoda siecznych")
                 {
-                    IntervalResult = Secant.EvalI(SelectedFunction, a, b, 100, epsilon);
+                    IntervalResult = Secant.EvalI(SelectedFunction, new Interval(a+epsilon), new Interval(b-epsilon), Iterations, epsilon);
                     OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
                 }
             }
+            else if (SelectedMode == "Manualna Przedziałowa")
+            {
+                var a1 = BigFloat.Parse(Start1.Trim(), AccuracyGoal.Absolute(20));
+                var b1 = BigFloat.Parse(End1.Trim(), AccuracyGoal.Absolute(20));
+                Result<Interval> IntervalResult;
+                if (SelectedMethod == "Metoda połowienia")
+                {
+                    IntervalResult = Bisection.EvalI(SelectedFunction, new Interval(a+epsilon, a1), new Interval(b, b1), Iterations, epsilon);
+                    OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
+                }
+
+                if (SelectedMethod == "Regula Falsi")
+                {
+                    IntervalResult = RegulaFalsi.EvalI(SelectedFunction, new Interval(a+epsilon, a1), new Interval(b, b1), Iterations, epsilon);
+                    OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
+                }
+
+                if (SelectedMethod == "Metoda siecznych")
+                {
+                    IntervalResult = Secant.EvalI(SelectedFunction, new Interval(a+epsilon, a1), new Interval(b, b1), Iterations, epsilon);
+                    OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
+                }
+                
+            }
         }
-        catch (Exception e)
+        catch (System.Exception e)
         {
             Console.WriteLine(e.Message);
             OutputField = "Wystąpił niespodziewany błąd.";
@@ -214,6 +242,29 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             stringBuilder.AppendLine("- Źle podany koniec przedziału!");
             isValid = false;
+        }
+
+        if (IsArithmeticModeSelected)
+        {
+            try
+            {
+                BigFloat.Parse(Start1);
+            }
+            catch (FormatException)
+            {
+                stringBuilder.AppendLine("- Źle podany początek przedziału!");
+                isValid = false;
+            }
+
+            try
+            {
+                BigFloat.Parse(End1);
+            }
+            catch (FormatException)
+            {
+                stringBuilder.AppendLine("- Źle podany koniec przedziału!");
+                isValid = false;
+            }
         }
 
         try

@@ -55,12 +55,10 @@ public class RegulaFalsi
         
     }
 
-    public static Result<Interval> EvalI(IFunction function, BigFloat start, BigFloat end, int mit, BigFloat epsilon)
+    public static Result<Interval> EvalI(IFunction function, Interval a, Interval b, int mit, BigFloat epsilon)
     {
         Interval F(Interval n) => function.Eval(n);
         
-        Interval a = new Interval(start);
-        Interval b = new Interval(end);
         
         BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
         BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
