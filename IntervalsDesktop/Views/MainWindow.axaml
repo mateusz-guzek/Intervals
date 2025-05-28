@@ -4,17 +4,18 @@
                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                xmlns:utility="clr-namespace:IntervalsDesktop.Utility"
+               xmlns:controls="clr-namespace:AvaloniaMath.Controls;assembly=AvaloniaMath"
                mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                x:Class="IntervalsDesktop.Views.MainWindow"
                x:DataType="vm:MainWindowViewModel"
                Width="800"
                Height="450"
-               Icon="/Assets/avalonia-logo.ico"
+               Icon="/Assets/favicon.ico"
                Title="Rozwiązywanie równań nieliniowych [Połowienie, Regula Falsi, Sieczne]"
-               Padding="16"
+               Padding="8"
                Margin="16"
                CanResize="False"
-               FontSize="11">
+               FontSize="13">
 
     <Design.DataContext>
         <vm:MainWindowViewModel />
@@ -36,7 +37,7 @@
                 <TextBox Grid.Row="1" Grid.Column="2" Width="128" IsVisible="{Binding IsArithmeticModeSelected}" Text="{Binding End1}" Watermark="B1"></TextBox>
                 <TextBlock Grid.Row="2" Grid.Column="0" TextAlignment="Right">Liczba iteracji:</TextBlock>
                 <TextBox Grid.Row="2" Grid.Column="1" Width="128" Text="{Binding Iterations}"></TextBox>
-                <TextBlock Grid.Row="3" Grid.Column="0" TextAlignment="Right">Epsilon ε:</TextBlock>
+                <TextBlock Grid.Row="3" Grid.Column="0" TextAlignment="Right">Epsilon:</TextBlock>
                 <TextBox Grid.Row="3" Grid.Column="1" Width="128" Text="{Binding Epsilon}"
                          Watermark="np. 1e-20 lub 0.00001"/>
                 
@@ -74,7 +75,8 @@
                      SelectedItem="{Binding SelectedFunction}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding StringRepresentation}" />
+                        <controls:FormulaBlock Formula="{Binding StringRepresentation}"/>
+                        <!-- <TextBlock Text="{Binding StringRepresentation}" /> -->
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

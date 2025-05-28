@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -93,23 +94,24 @@ public partial class MainWindowViewModel : ViewModelBase
             if (SelectedMode == "Standardowa")
             {
                 Console.WriteLine(SelectedFunction.StringRepresentation);
-                Result<BigFloat> BigFloatResult;
+                Result<BigFloat> bigFloatResult;
                 if (SelectedMethod == "Metoda połowienia")
                 {
-                    BigFloatResult = Bisection.EvalR(SelectedFunction, a, b, Iterations, epsilon);
-                    OutputField = MakeOutputString(BigFloatResult, SelectedFunction, epsilon, SelectedMethod);
+                    bigFloatResult = Bisection.EvalR(SelectedFunction, a, b, Iterations, epsilon);
+                    OutputField = MakeOutputString(bigFloatResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Regula Falsi")
                 {
-                    BigFloatResult = RegulaFalsi.EvalR(SelectedFunction, a, b, Iterations, epsilon);
-                    OutputField = MakeOutputString(BigFloatResult, SelectedFunction, epsilon, SelectedMethod);
+                    bigFloatResult = RegulaFalsi.EvalR(SelectedFunction, a, b, Iterations, epsilon);
+                    Console.WriteLine(bigFloatResult.Value.ToString());
+                    OutputField = MakeOutputString(bigFloatResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Metoda siecznych")
                 {
-                    BigFloatResult = Secant.EvalR(SelectedFunction, a, b, Iterations, epsilon);
-                    OutputField = MakeOutputString(BigFloatResult, SelectedFunction, epsilon, SelectedMethod);
+                    bigFloatResult = Secant.EvalR(SelectedFunction, a, b, Iterations, epsilon);
+                    OutputField = MakeOutputString(bigFloatResult, SelectedFunction, epsilon, SelectedMethod);
                 }
             }
             else if (SelectedMode == "Automatyczna Przedziałowa")
@@ -117,19 +119,19 @@ public partial class MainWindowViewModel : ViewModelBase
                 Result<Interval> IntervalResult;
                 if (SelectedMethod == "Metoda połowienia")
                 {
-                    IntervalResult = Bisection.EvalI(SelectedFunction, new Interval(a+epsilon), new Interval(b-epsilon), Iterations, epsilon);
+                    IntervalResult = Bisection.EvalI(SelectedFunction, new Interval(a+1e-16), new Interval(b-1e-16), Iterations, epsilon);
                     OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Regula Falsi")
                 {
-                    IntervalResult = RegulaFalsi.EvalI(SelectedFunction, new Interval(a+epsilon), new Interval(b-epsilon), Iterations, epsilon);
+                    IntervalResult = RegulaFalsi.EvalI(SelectedFunction, new Interval(a+1e-16), new Interval(b-1e-16), Iterations, epsilon);
                     OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Metoda siecznych")
                 {
-                    IntervalResult = Secant.EvalI(SelectedFunction, new Interval(a+epsilon), new Interval(b-epsilon), Iterations, epsilon);
+                    IntervalResult = Secant.EvalI(SelectedFunction, new Interval(a+1e-16), new Interval(b-1e-16), Iterations, epsilon);
                     OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
                 }
             }
@@ -140,19 +142,19 @@ public partial class MainWindowViewModel : ViewModelBase
                 Result<Interval> IntervalResult;
                 if (SelectedMethod == "Metoda połowienia")
                 {
-                    IntervalResult = Bisection.EvalI(SelectedFunction, new Interval(a+epsilon, a1), new Interval(b, b1), Iterations, epsilon);
+                    IntervalResult = Bisection.EvalI(SelectedFunction, new Interval(a+1e-16, a1), new Interval(b, b1-1e-16), Iterations, epsilon);
                     OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Regula Falsi")
                 {
-                    IntervalResult = RegulaFalsi.EvalI(SelectedFunction, new Interval(a+epsilon, a1), new Interval(b, b1), Iterations, epsilon);
+                    IntervalResult = RegulaFalsi.EvalI(SelectedFunction, new Interval(a+1e-16, a1), new Interval(b, b1-1e-16), Iterations, epsilon);
                     OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Metoda siecznych")
                 {
-                    IntervalResult = Secant.EvalI(SelectedFunction, new Interval(a+epsilon, a1), new Interval(b, b1), Iterations, epsilon);
+                    IntervalResult = Secant.EvalI(SelectedFunction, new Interval(a+1e-16, a1), new Interval(b, b1-1e-16), Iterations, epsilon);
                     OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
                 }
                 
@@ -160,7 +162,8 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         catch (System.Exception e)
         {
-            Console.WriteLine(e.Message);
+            Console.WriteLine(e);
+            Console.WriteLine(e.StackTrace);
             OutputField = "Wystąpił niespodziewany błąd.";
         }
     }
@@ -168,10 +171,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private static string MakeOutputString<T>(Result<T> result, IFunction function, BigFloat epsilon,
         string method)
     {
-        var sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
         sb.AppendLine($"Wybrana Metoda: {method}");
-        sb.AppendLine($"Wybrana Funkcja: {function?.StringRepresentation ?? "(brak)"}");
         sb.AppendLine($"ε: {epsilon}");
         sb.AppendLine($"Liczba iteracji: {result.Iterations}");
         // Status oceny
@@ -198,11 +200,21 @@ public partial class MainWindowViewModel : ViewModelBase
                 sb.AppendLine("Wystąpił nieznany błąd.");
                 break;
         }
+        
 
         // Wypisz wynik tylko jeśli istnieje
         if (result.Value is not null)
         {
-            sb.AppendLine($"X\u2080: {result.Value.ToString()}");
+            if (result.Value is BigFloat bigFloat)
+            {
+                sb.AppendLine($"X\u2080: {bigFloat.ToString("e16")}");
+            }
+            else if (result.Value is Interval interval)
+            {
+                
+                sb.AppendLine($"X\u2080: {interval}");
+                sb.AppendLine($"Szerokość przedziału: {interval.Width()}");
+            }
         }
         else
         {

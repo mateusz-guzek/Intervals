@@ -10,14 +10,14 @@ public class MyFunctions : IMyFunctions
     {
         return new List<IFunction>()
         {
-            new UserFunction("f(x) = x^2 - 2", 
+            new UserFunction(@"f(x) = x^2 - 2", 
                 x => BigFloat.Pow(x,2) - new BigFloat(2),
                 x => x.Sqr() - new Interval(2)
                 ),
-            new UserFunction("f(x) = x * e^(sqrt(x+1))-1", 
+            new UserFunction(@"f(x) = x \cdot e^{\sqrt{x+1}} - 1", 
                 x => x * BigFloat.Exp(BigFloat.Sqrt(x+1)) - new BigFloat(1),
                 x => x * (x+new Interval(1)).Sqrt().Exp() - new Interval(1)),
-            new UserFunction("f(x) = sin^2(x) + sin(x)/2 - 1/2",
+            new UserFunction(@"f(x) = \sin^2(x) + \frac{\sin(x)}{2} - \frac{1}{2}",
                 x =>
                 {
                     BigFloat s = BigFloat.Sin(x);

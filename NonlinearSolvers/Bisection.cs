@@ -69,16 +69,16 @@ public static class Bisection
 
         int iterations = 0;
 
-        while (BigFloat.Abs(a.Start - b.End) > epsilon)
+        while ((b.Start - a.Start) > epsilon)
         {
             iterations++;
 
             Interval mid = (a + b) / new Interval(2);
             //BigFloat midPoint = (a.Start + b.End) / 2;
             //Interval mid = new Interval(midPoint);
-
-            if (F(mid).Contains(0) && F(mid).Width() < epsilon)
-                return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, mid);
+            
+            if (F(mid).Contains(0) && BigFloat.Abs(F(mid).End) < epsilon)
+                return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, new Interval(a.Start, b.End));
 
             if ((F(a) * F(mid)).ContainsNegative())
             {
@@ -91,12 +91,13 @@ public static class Bisection
 
             if (iterations >= mit)
             {
-                return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, mid);
+                return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, new Interval(a.Start, b.End));
             }
+            
 
         }
 
-        return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, (a + b) / new Interval(2));
+        return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, new Interval(a.Start, b.End));
 
         
     }

@@ -27,7 +27,7 @@ namespace Intervals
     public class Interval
     {
 
-        private BigFloat epsilon = 1e-17;
+        private BigFloat epsilon = new BigFloat(1e-17);
 
         private BigFloat start;
         private BigFloat end;
@@ -80,7 +80,7 @@ namespace Intervals
 
         public override string ToString()
         {
-            return $"[{start} , {end}]";
+            return $"[{start.ToString("E16")} , {end.ToString("E16")}]";
         }
 
         public static Interval operator +(Interval left, Interval right)

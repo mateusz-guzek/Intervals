@@ -26,7 +26,7 @@ public class RegulaFalsi
         BigFloat x1 = (a * F(b) - b * F(a)) / (F(b) - F(a));
 
 
-        while (BigFloat.Abs(a - b) > epsilon)
+        while (BigFloat.Abs(F(x1)) > epsilon)
         {
             iterations++;
             if ((F(a) * F(x1)).Sign < 0)
@@ -77,33 +77,28 @@ public class RegulaFalsi
         while (a.Distance(b) > epsilon && !F(x1).Contains(BigFloat.Zero))
         {
             iterations++;
-            try
+            try{
+                
+            Interval fx1 = F(x1);
+
+            // choose sub‑interval that still brackets zero
+            if ((F(a) * fx1).ContainsNegative())
             {
-                if ((F(a) * F(x1)).ContainsNegative())
-                {
-                    denom = F(a) - F(x1);
-                    x1 = (x1 * F(a) - a * F(x1)) / denom;
-                }
-                else if ((F(b) * F(x1)).ContainsNegative())
-                {
-                    denom = F(b) - F(x1);
-                    x1 = (x1 * F(b) - b * F(x1)) / denom;
-                }
-
-
-                if ((F(a) * F(x1)).ContainsNegative())
-                {
-                    b = x1;
-                }
-                else
-                {
-                    a = x1;
-                }
-
-                if (iterations == mit)
-                {
-                    break;
-                }
+                // root in [a, x1]
+                b     = x1;
+                denom = F(a) - fx1;                    // branch‑specific denom
+                if (denom.Contains(BigFloat.Zero))
+                    throw new DivideByZeroException();
+                x1    = (x1 * F(a) - a * fx1) / denom; // branch‑specific update
+            }
+            else // root in [x1, b]
+            {
+                a     = x1;
+                denom = F(b) - fx1;                    // branch‑specific denom
+                if (denom.Contains(BigFloat.Zero))
+                    throw new DivideByZeroException();
+                x1    = (x1 * F(b) - b * fx1) / denom; // branch‑specific update
+            }
             }
             catch (Exception e)
             {
