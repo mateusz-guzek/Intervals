@@ -27,7 +27,7 @@ namespace Intervals
     public class Interval
     {
 
-        private BigFloat epsilon = new BigFloat(1e-17);
+        private BigFloat epsilon = new BigFloat(1e-16);
 
         private BigFloat start;
         private BigFloat end;
@@ -39,11 +39,8 @@ namespace Intervals
 
         public Interval(BigFloat start, BigFloat end)
         {
-            if (start.CompareTo(end) > 0)
-                throw new ArgumentException("Start cannot be greater than end.");
-
-            this.start = start;
-            this.end = end;
+            this.start = start > end ? end : start;
+            this.end = start > end ? start : end;
         }
 
         public Interval(string number)
@@ -58,19 +55,21 @@ namespace Intervals
             BigFloat x = BigFloat.Parse(start);
             BigFloat y = BigFloat.Parse(end);
             
-            this.start = x - epsilon;
-            this.end = y + epsilon;
+            this.start = x;
+            this.end = y;
         }
 
         public Interval(BigFloat number)
         {
-            start = number - epsilon;
-            end = number + epsilon;
+            //BigFloat creationEpsilon = BigFloat.Parse("1e-128");
+            start = number;// - creationEpsilon;
+            end = number;// + creationEpsilon;
         }
 
         public bool Contains(BigFloat number)
         {
-            return start <= number && end >= number;
+            // start.RestrictPrecision(AccuracyGoal.Absolute(16), RoundingMode.TowardsNegativeInfinity);
+            return start.RestrictPrecision(AccuracyGoal.Absolute(16), RoundingMode.TowardsNegativeInfinity) <= number && end.RestrictPrecision(AccuracyGoal.Absolute(16), RoundingMode.TowardsPositiveInfinity) >= number;
         }
 
         public BigFloat Width()
@@ -91,6 +90,7 @@ namespace Intervals
         public static Interval operator -(Interval left, Interval right)
         {
             return new Interval(left.start - right.end, left.end - right.start);
+            
         }
 
         public static Interval operator *(Interval left, Interval right)
@@ -98,7 +98,13 @@ namespace Intervals
             BigFloat a = left.start, b = left.end;
             BigFloat c = right.start, d = right.end;
 
-            BigFloat[] products = { a * c, a * d, b * c, b * d };
+            BigFloat[] products =
+            {
+                 BigFloat.Multiply(a, c, AccuracyGoal.Absolute(300), RoundingMode.TowardsNearest ),
+                 BigFloat.Multiply(a, d, AccuracyGoal.Absolute(300), RoundingMode.TowardsNearest ),
+                 BigFloat.Multiply(b, c, AccuracyGoal.Absolute(300), RoundingMode.TowardsNearest ),
+                 BigFloat.Multiply(b, d, AccuracyGoal.Absolute(300), RoundingMode.TowardsNearest ),
+            };
 
             BigFloat min = products.Min();
             BigFloat max = products.Max();
@@ -112,8 +118,8 @@ namespace Intervals
             if (right.Contains(0))
                 throw new DivideByZeroException("Division by an interval containing zero is undefined.");
 
-            BigFloat newRightA = 1 / right.End;
-            BigFloat newRightB = 1 / right.Start;
+            BigFloat newRightA = BigFloat.Divide(BigFloat.One, right.End, AccuracyGoal.Absolute(300), RoundingMode.TowardsNearest );
+            BigFloat newRightB = BigFloat.Divide(BigFloat.One, right.Start, AccuracyGoal.Absolute(300), RoundingMode.TowardsNearest );
 
             Interval newRight = new Interval(newRightA, newRightB);
             return left * newRight;

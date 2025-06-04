@@ -82,10 +82,12 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             var valid = AreInputsValid();
             if (!valid) return;
+            
+            BigFloat creationEpsilon = BigFloat.Parse("1e-128");
 
 
-            var a = BigFloat.Parse(Start.Trim(), AccuracyGoal.Absolute(20));
-            var b = BigFloat.Parse(End.Trim(), AccuracyGoal.Absolute(20));
+            var a = BigFloat.Parse(Start.Trim(), AccuracyGoal.Absolute(300));
+            var b = BigFloat.Parse(End.Trim(), AccuracyGoal.Absolute(300));
 
             var epsilon = BigFloat.Parse(Epsilon.Trim());
 
@@ -104,7 +106,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 if (SelectedMethod == "Regula Falsi")
                 {
                     bigFloatResult = RegulaFalsi.EvalR(SelectedFunction, a, b, Iterations, epsilon);
-                    Console.WriteLine(bigFloatResult.Value.ToString());
+                    //Console.WriteLine(bigFloatResult.Value.ToString());
                     OutputField = MakeOutputString(bigFloatResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
@@ -119,42 +121,42 @@ public partial class MainWindowViewModel : ViewModelBase
                 Result<Interval> IntervalResult;
                 if (SelectedMethod == "Metoda połowienia")
                 {
-                    IntervalResult = Bisection.EvalI(SelectedFunction, new Interval(a+1e-16), new Interval(b-1e-16), Iterations, epsilon);
+                    IntervalResult = Bisection.EvalI(SelectedFunction, new Interval(a, a+creationEpsilon), new Interval(b - creationEpsilon,b), Iterations, epsilon);
                     OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Regula Falsi")
                 {
-                    IntervalResult = RegulaFalsi.EvalI(SelectedFunction, new Interval(a+1e-16), new Interval(b-1e-16), Iterations, epsilon);
+                    IntervalResult = RegulaFalsi.EvalI(SelectedFunction, new Interval(a + creationEpsilon), new Interval(b - creationEpsilon, b), Iterations, epsilon);
                     OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Metoda siecznych")
                 {
-                    IntervalResult = Secant.EvalI(SelectedFunction, new Interval(a+1e-16), new Interval(b-1e-16), Iterations, epsilon);
+                    IntervalResult = Secant.EvalI(SelectedFunction, new Interval(a + creationEpsilon), new Interval(b - creationEpsilon,b), Iterations, epsilon);
                     OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
                 }
             }
             else if (SelectedMode == "Manualna Przedziałowa")
             {
-                var a1 = BigFloat.Parse(Start1.Trim(), AccuracyGoal.Absolute(20));
-                var b1 = BigFloat.Parse(End1.Trim(), AccuracyGoal.Absolute(20));
+                var a1 = BigFloat.Parse(Start1.Trim(), AccuracyGoal.Absolute(300));
+                var b1 = BigFloat.Parse(End1.Trim(), AccuracyGoal.Absolute(300));
                 Result<Interval> IntervalResult;
                 if (SelectedMethod == "Metoda połowienia")
                 {
-                    IntervalResult = Bisection.EvalI(SelectedFunction, new Interval(a+1e-16, a1), new Interval(b, b1-1e-16), Iterations, epsilon);
+                    IntervalResult = Bisection.EvalI(SelectedFunction, new Interval(a, a1), new Interval(b, b1), Iterations, epsilon);
                     OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Regula Falsi")
                 {
-                    IntervalResult = RegulaFalsi.EvalI(SelectedFunction, new Interval(a+1e-16, a1), new Interval(b, b1-1e-16), Iterations, epsilon);
+                    IntervalResult = RegulaFalsi.EvalI(SelectedFunction, new Interval(a, a1), new Interval(b, b1), Iterations, epsilon);
                     OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
                 }
 
                 if (SelectedMethod == "Metoda siecznych")
                 {
-                    IntervalResult = Secant.EvalI(SelectedFunction, new Interval(a+1e-16, a1), new Interval(b, b1-1e-16), Iterations, epsilon);
+                    IntervalResult = Secant.EvalI(SelectedFunction, new Interval(a, a1), new Interval(b, b1), Iterations, epsilon);
                     OutputField = MakeOutputString(IntervalResult, SelectedFunction, epsilon, SelectedMethod);
                 }
                 
@@ -181,19 +183,13 @@ public partial class MainWindowViewModel : ViewModelBase
         switch (result.Status)
         {
             case EvalStatus.FULL_SUCCESS:
-                sb.AppendLine("Sukces – znaleziono rozwiązanie z dokładnością ε.");
+                sb.AppendLine("Sukces – znaleziono rozwiązanie");
                 break;
             case EvalStatus.NO_SIGN_CHANGE:
                 sb.AppendLine("Błąd – funkcja nie zmienia znaku w podanym przedziale.");
                 break;
-            case EvalStatus.NO_CONVERGENCE:
-                sb.AppendLine("Nie osiągnięto wymaganej dokładności – brak zbieżności.");
-                break;
-            case EvalStatus.DIVISION_BY_ZERO:
-                sb.AppendLine("Błąd – dzielenie przez zero.");
-                break;
-            case EvalStatus.NOT_ACCURATE:
-                sb.AppendLine("Wynik nie spełnia dokładności.");
+            case EvalStatus.NOT_ENOUGH_ITERATIONS:
+                sb.AppendLine("Nie wystarczająca ilość iteracji.");
                 break;
             case EvalStatus.ERROR:
             default:
@@ -213,7 +209,7 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 
                 sb.AppendLine($"X\u2080: {interval}");
-                sb.AppendLine($"Szerokość przedziału: {interval.Width()}");
+                sb.AppendLine($"Szerokość przedziału: {interval.Width().ToString("e16")}");
             }
         }
         else

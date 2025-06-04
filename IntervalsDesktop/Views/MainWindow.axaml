@@ -39,7 +39,7 @@
                 <TextBox Grid.Row="2" Grid.Column="1" Width="128" Text="{Binding Iterations}"></TextBox>
                 <TextBlock Grid.Row="3" Grid.Column="0" TextAlignment="Right">Epsilon:</TextBlock>
                 <TextBox Grid.Row="3" Grid.Column="1" Width="128" Text="{Binding Epsilon}"
-                         Watermark="np. 1e-20 lub 0.00001"/>
+                         Watermark="1e-16"/>
                 
             </Grid>
         </StackPanel>

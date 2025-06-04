@@ -9,18 +9,10 @@ public class Secant
     public static Result<BigFloat> EvalR(IFunction function, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
     {
         BigFloat F(BigFloat x) => function.Eval(x);
-
-        // Ustawiamy cele dokładności (opcjonalne, ale zgodne ze stylem EvalR)
-        BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
-        BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
-
-        // Początkowe obliczenia: korekta przedziału [a, b]
-        BigFloat h = new BigFloat(0.179372) * (b - a);
-        a += h;
-        b -= h;
+        
+        
         
 
-        // Jeśli |fa| < |fb|, zamieniamy punkty tak, by |fa| >= |fb|
         if (BigFloat.Abs(F(a)) < BigFloat.Abs(F(b)))
         {
             (a, b) = (b, a);
@@ -38,7 +30,7 @@ public class Secant
             if (denom.IsZero)
             {
                 return new Result<BigFloat>(
-                    EvalStatus.DIVISION_BY_ZERO,
+                    EvalStatus.ERROR,
                     iterations,
                     BigFloat.Zero);
             }
@@ -55,15 +47,13 @@ public class Secant
                     iterations,
                     xn);
             }
-
-            // przesuwamy przedziały:
+            
             a = b;
             b = xn;
         }
-
-        // brak zbieżności w wyznaczonej liczbie iteracji
+        
         return new Result<BigFloat>(
-            EvalStatus.NO_CONVERGENCE,
+            EvalStatus.NOT_ENOUGH_ITERATIONS,
             iterations,
             xn);
     }
@@ -72,44 +62,26 @@ public class Secant
     {
         Interval F(Interval x) => function.Eval(x);
         
-        BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
-        BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
-
-        List<Interval> intervals = new List<Interval>();
-
-        
-
-        
-        // if (!(F(a) * F(b)).ContainsNegative())
-        // {
-        //     return new Result<Interval>(EvalStatus.NO_SIGN_CHANGE, 0, null);
-        // }
-
-        Interval outcache = new Interval(0);
-        int iterations = 0;
-        do
+        int i = 0;
+        Interval c = new Interval(0);
+        for (; i < mit; i++)
         {
-            iterations++;
-            Interval denom = F(a) - F(b);
-            if (denom.Contains(0))
+            try
             {
-                return new Result<Interval>(EvalStatus.DIVISION_BY_ZERO, iterations, intervals.MinBy(interval => interval.Width()));
+                c = b - F(b) * (b - a) / (F(b) - F(a));
+                (a, b) = (b, c);
+
+                if (BigFloat.Abs(F(c).End) <= epsilon && c.Width() < epsilon)
+                    break;
             }
-            Interval xn = (F(a) * b - F(b) * a) / denom;
-            if(F(xn).Contains(0))
-                intervals.Add(xn);
-            outcache = xn;
+            catch { break; }
+        }
 
-            if (F(xn).Width() < epsilon && F(xn).Contains(0))
-            {
-                return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, xn);
-            }
+        if (i == 0)
+        {
+            return new Result<Interval>(EvalStatus.NO_SIGN_CHANGE, i, null);
+        }
+        return new Result<Interval>(EvalStatus.FULL_SUCCESS, i, c);
 
-            a = b;
-            b = xn;
-
-        } while(iterations < mit);
-        
-        return new Result<Interval>(EvalStatus.NOT_ACCURATE, iterations, outcache);
     }
 }

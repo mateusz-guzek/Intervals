@@ -9,12 +9,8 @@ public class RegulaFalsi
 {
     public static Result<BigFloat> EvalR(IFunction function, BigFloat a, BigFloat b, int mit, BigFloat epsilon)
     {
-        
         BigFloat F(BigFloat n) => function.Eval(n);
-        
-        BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
-        BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
-        
+
         if ((F(a) * F(b)) > new BigFloat(0))
             return new Result<BigFloat>(EvalStatus.NO_SIGN_CHANGE, 0, null);
 
@@ -52,62 +48,33 @@ public class RegulaFalsi
         }
 
         return new Result<BigFloat>(EvalStatus.FULL_SUCCESS, iterations, x1);
-        
     }
 
     public static Result<Interval> EvalI(IFunction function, Interval a, Interval b, int mit, BigFloat epsilon)
     {
         Interval F(Interval n) => function.Eval(n);
-        
-        
-        BigFloat.InitialAccuracyGoal = AccuracyGoal.Absolute(20);
-        BigFloat.DefaultAccuracyGoal = AccuracyGoal.Absolute(20);
-
         if (!(F(a) * F(b)).ContainsNegative())
             return new Result<Interval>(EvalStatus.NO_SIGN_CHANGE, 0, null);
-
-
         epsilon = BigFloat.Abs(epsilon);
-
-        int iterations = 0;
-
-        Interval denom = F(b) - F(a);
-        Interval x1 = (a * F(b) - b * F(a)) / denom;
-
-        while (a.Distance(b) > epsilon && !F(x1).Contains(BigFloat.Zero))
+        Interval c = a;
+        int i = 0;
+        for (; i < mit; i++)
         {
-            iterations++;
-            try{
-                
-            Interval fx1 = F(x1);
+            Interval denom = F(b) - F(a);
+            if(denom.Contains(0))
+                return new Result<Interval>(EvalStatus.FULL_SUCCESS, i, c);
+            
+            c = b - (F(b) * (b-a)) / denom;
 
-            // choose sub‑interval that still brackets zero
-            if ((F(a) * fx1).ContainsNegative())
-            {
-                // root in [a, x1]
-                b     = x1;
-                denom = F(a) - fx1;                    // branch‑specific denom
-                if (denom.Contains(BigFloat.Zero))
-                    throw new DivideByZeroException();
-                x1    = (x1 * F(a) - a * fx1) / denom; // branch‑specific update
-            }
-            else // root in [x1, b]
-            {
-                a     = x1;
-                denom = F(b) - fx1;                    // branch‑specific denom
-                if (denom.Contains(BigFloat.Zero))
-                    throw new DivideByZeroException();
-                x1    = (x1 * F(b) - b * fx1) / denom; // branch‑specific update
-            }
-            }
-            catch (Exception e)
-            {
-                return new Result<Interval>(EvalStatus.DIVISION_BY_ZERO, iterations, x1);
-            }
+            if ((BigFloat.Abs(F(c).End)) < epsilon && c.Width() < epsilon)
+                break;
+            if ((F(a) * F(c)).ContainsNegative())
+                b = c;
+            else
+                a = c;
+
         }
 
-        return new Result<Interval>(EvalStatus.FULL_SUCCESS, iterations, x1);
-
-        
+        return new Result<Interval>(EvalStatus.FULL_SUCCESS, i, c);
     }
 }
