@@ -133,6 +133,19 @@ public class SimpleTests
         var secantResult = Secant.EvalI(third, start, end, 60, 1e-16);
         Assert.True(secantResult.Value.Contains(expected));
     }
+
+    [Fact]
+    public void RegulaFalsiError()
+    {
+        BigFloat one = BigFloat.Parse("2.9999999");
+        BigFloat one1 = BigFloat.Parse("3.0000001");
+        BigFloat two = BigFloat.Parse("3.9999999");
+        BigFloat two1 = BigFloat.Parse("4.0000001");
+        Interval start = new Interval(one, one1);
+        Interval end = new Interval(two, two1);
+        var regulaFalsiResult = RegulaFalsi.EvalI(second,start,end,60, 1e-16);
+        Assert.True(regulaFalsiResult.Status == EvalStatus.NO_SIGN_CHANGE);
+    }
     
     
     

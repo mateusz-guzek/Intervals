@@ -8,6 +8,7 @@ using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Functions;
 using IntervalsDesktop.ViewModels;
+using UserFunctions;
 
 namespace IntervalsDesktop.Views;
 
@@ -23,7 +24,7 @@ public partial class MainWindow : Window
 
         try
         {
-       
+        
             var topLevel = TopLevel.GetTopLevel(this);
             
             var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
@@ -32,21 +33,21 @@ public partial class MainWindow : Window
                 AllowMultiple = false,
                 FileTypeFilter = new List<FilePickerFileType>(){new("dll")}
             });
-
+        
             if (files.Count >= 1)
             {
                 string pathToDll = files[0].Path.AbsolutePath;
-
+        
                 Assembly assembly = Assembly.LoadFrom(pathToDll);
                 
                 Type? myFunctionsType = assembly
                     .GetTypes()
                     .FirstOrDefault(t => typeof(IMyFunctions).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
-
+        
                 if (myFunctionsType != null)
                 {
                     var instance = Activator.CreateInstance(myFunctionsType) as IMyFunctions;
-
+        
                     if (instance != null)
                     {
                         var functions = instance.Functions();
@@ -58,7 +59,7 @@ public partial class MainWindow : Window
                             }
                             
                         }
-
+        
                     }
                 }
             }
@@ -67,5 +68,12 @@ public partial class MainWindow : Window
         {
             Console.WriteLine(ex.Message);
         }
+        // if (DataContext is MainWindowViewModel vm)
+        // {
+        //     foreach (var function in new MyFunctions().Functions())
+        //     {
+        //         vm.Functions.Add(function);
+        //     }
+        // }
     }
 }

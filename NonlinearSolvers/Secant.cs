@@ -79,7 +79,7 @@ public class Secant
 
         if (i == 0)
         {
-            return new Result<Interval>(EvalStatus.NO_SIGN_CHANGE, i, null);
+            return new Result<Interval>(EvalStatus.ERROR, i, null);
         }
         return new Result<Interval>(EvalStatus.FULL_SUCCESS, i, c);
 
